@@ -1,0 +1,109 @@
+﻿<nav class="navbar navbar-expand-md navbar-dark fixed-top" style="height:50px; background-color:#41598c;">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-controller="Dashboard" asp-action="Dispatcher" style="padding:0;">
+            <img src="~/images/WAC_logo.png" alt="WAC Logo" style="height:45px; width:auto;" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="sidebarMenu">
+            <ul class="navbar-nav ms-auto">
+                <!-- ─── NOTIFICATION BELL ─── -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pt-2" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:#fff;">
+                        <i class="ri-notification-3-line" style="font-size: 1.3rem;"></i>
+                        <span class="badge bg-danger rounded-pill" id="notificationBadge" style="font-size: 0.6rem; position: relative; top: -10px; left: -8px; padding: 0.15rem 0.45rem;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 400px; max-height: 400px; overflow-y: auto;">
+                        <li><h6 class="dropdown-header">Notifications</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li id="notificationList">
+                            <div class="text-center text-muted small py-2">No notifications</div>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- ─── USER DROPDOWN ─────────────────────────────────────────── -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                       href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                       aria-expanded="false" style="color:#fff; padding:0.3rem 0.6rem; border-radius:2rem; transition:background 0.2s;">
+                        <div class="avatar-circle" style="width:32px; height:32px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,0.3);">
+                            <i class="ri-user-3-line" style="font-size:1.1rem; color:#fff;"></i>
+                        </div>
+                        <span class="d-none d-md-inline" style="font-weight:500; font-size:0.9rem;">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                @User.Identity.Name
+                            }
+                            else
+                            {
+                                <span>Guest</span>
+                            }
+                        </span>
+                        @* <i class="ri-arrow-down-s-line an-user-chev d-none d-xl-block" style="font-size:1.1rem; opacity:0.7;"></i> *@
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end" style="min-width:220px; border:none; border-radius:0.75rem; box-shadow:0 8px 30px rgba(0,0,0,0.1); padding:0.5rem 0; margin-top:0.3rem;">
+                        <!-- Dropdown Header -->
+                        <li class="dropdown-header" style="padding:0.75rem 1rem; font-size:0.75rem; text-transform:uppercase; color:#6c757d; letter-spacing:0.04em; border-bottom:1px solid #f0f2f5;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle-sm" style="width:36px; height:36px; background:#337ab7; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:0.9rem;">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        @User.Identity.Name.Substring(0, 1).ToUpper()
+                                    }
+                                    else
+                                    {
+                                        <i class="ri-user-3-line"></i>
+                                    }
+                                </div>
+                                <div>
+                                    <div style="font-weight:600; font-size:0.9rem; color:#1e293b;">
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            @User.Identity.Name
+                                        }
+                                        else
+                                        {
+                                            <span>Guest</span>
+                                        }
+                                    </div>
+                                    <div style="font-size:0.7rem; color:#94a3b8;">
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            <span>Signed in</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Not signed in</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li><hr class="dropdown-divider" style="margin:0.3rem 0;"></li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li>
+                                <a class="dropdown-item" asp-controller="Login" asp-action="Logout" style="padding:0.6rem 1rem; font-size:0.9rem; color:#1e293b; transition:background 0.15s;">
+                                    <i class="ri-logout-box-r-line" style="margin-right:0.6rem; color:#94a3b8;"></i> Logout
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <a class="dropdown-item" asp-controller="Login" asp-action="Index" style="padding:0.6rem 1rem; font-size:0.9rem; color:#1e293b; transition:background 0.15s;">
+                                    <i class="ri-login-box-line" style="margin-right:0.6rem; color:#94a3b8;"></i> Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
