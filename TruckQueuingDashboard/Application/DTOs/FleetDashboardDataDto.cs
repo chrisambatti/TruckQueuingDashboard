@@ -4,5 +4,6 @@
     {
         public List<FleetEventDto> FleetEvents { get; set; } = new();
         public FleetSummaryDto FleetSummary { get; set; } = new();
+        public List<FleetEventDto> RecentExits { get; set; } = new();
     }
 }

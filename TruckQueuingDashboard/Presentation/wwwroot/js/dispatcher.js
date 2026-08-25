@@ -33,7 +33,7 @@ $(document).ready(function () {
     var historyData = [];
     var historyTableInit = false;
 
-    function filterHistoryTable(filterValue, fromDate, toDate) {
+    function filterHistoryTable(filterValue, fromDate, toDate, searchTerm) {
         var table = $('#historyTable').DataTable();
         table.clear();
         if (!historyData || historyData.length === 0) {
@@ -43,7 +43,10 @@ $(document).ready(function () {
         }
         var filtered = historyData.filter(function (ev) {
             var event = ev.event ? ev.event.trim() : '';
+            var fleetNumber = ev.fleetNumber ? ev.fleetNumber.trim() : '';
+            var location = ev.location ? ev.location.trim() : '';
             var evDate = ev.eventTimestamp ? new Date(ev.eventTimestamp) : null;
+
             if (filterValue !== "View All" && event !== filterValue) return false;
             if (fromDate && evDate) {
                 var from = new Date(fromDate);
@@ -55,13 +58,26 @@ $(document).ready(function () {
                 to.setHours(23, 59, 59, 999);
                 if (evDate > to) return false;
             }
+
+            // ── Search ──
+            if (searchTerm && searchTerm.trim() !== '') {
+                var term = searchTerm.trim().toLowerCase();
+                var match = fleetNumber.toLowerCase().includes(term) ||
+                    event.toLowerCase().includes(term) ||
+                    location.toLowerCase().includes(term) ||
+                    (ev.eventTimestamp ? new Date(ev.eventTimestamp).toLocaleString().toLowerCase().includes(term) : false);
+                if (!match) return false;
+            }
+
             return true;
         });
+
         if (fromDate || toDate) {
             filtered.sort((a, b) => new Date(a.eventTimestamp) - new Date(b.eventTimestamp));
         } else {
             filtered.sort((a, b) => new Date(b.eventTimestamp) - new Date(a.eventTimestamp));
         }
+
         if (filtered.length === 0) {
             table.row.add(['<td colspan="5" class="text-center py-4 text-muted">No events found.</td>']);
         } else {
@@ -88,6 +104,7 @@ $(document).ready(function () {
                 ]);
             });
         }
+
         table.draw();
         $('#historyTotalCount').text(filtered.length);
     }
@@ -95,6 +112,8 @@ $(document).ready(function () {
     function applyHistoryFilters() {
         var fromDate = $('#historyFromDate').val();
         var toDate = $('#historyToDate').val();
+        var searchTerm = $('#historySearch').val();
+
         if (fromDate && toDate) {
             var fromParsed = Date.parse(fromDate);
             var toParsed = Date.parse(toDate);
@@ -104,9 +123,10 @@ $(document).ready(function () {
             }
         }
         var filterValue = $('#historyFilter').val();
-        filterHistoryTable(filterValue, fromDate, toDate);
+        filterHistoryTable(filterValue, fromDate, toDate, searchTerm);
     }
 
+    // ── Event listeners ──
     $('#viewHistoryBtn').on('click', function () {
         $.ajax({
             url: '/Dashboard/GetAllEvents',
@@ -140,6 +160,7 @@ $(document).ready(function () {
                     });
                     historyTableInit = true;
                 }
+                $('#historySearch').val('');
                 $('#historyFromDate').val('');
                 $('#historyToDate').val('');
                 $('#historyFilter').val('View All');
@@ -151,8 +172,15 @@ $(document).ready(function () {
         });
     });
 
+    // ── Search input ──
+    $('#historySearch').on('keyup', function () {
+        applyHistoryFilters();
+    });
+
+    // ── Reset on modal close ──
     $('#historyFilter, #historyFromDate, #historyToDate').on('change', applyHistoryFilters);
     $('#historyModal').on('hidden.bs.modal', function () {
+        $('#historySearch').val('');
         $('#historyFilter').val('View All');
         $('#historyFromDate').val('');
         $('#historyToDate').val('');
@@ -206,7 +234,7 @@ $(document).ready(function () {
 
         // ── Update bays ──
         var bayTrucks = queue.slice(0, bayCount);
-        var upNext = queue.slice(bayCount, bayCount + 2);
+        var upNext = queue.slice(bayCount, bayCount + 4);
 
         $('.queue-stats .now-serving-ticket.primary').each(function (index) {
             var bay = bayTrucks[index];
@@ -232,15 +260,37 @@ $(document).ready(function () {
         });
 
         // ── Update Up Next ──
+        // ── Update Up Next with waiting time ──
+        var upNext = queue.slice(bayCount, bayCount + 4); // adjust count
         var $upNextList = $('.up-next-list');
         $upNextList.empty();
         if (upNext.length > 0) {
             upNext.forEach(function (ev) {
+                var waitingText = '';
+                if (ev.event === 'Entry') {
+                    var diff = new Date() - new Date(ev.eventTimestamp);
+                    var minutes = Math.floor(diff / 60000);
+                    var hours = Math.floor(minutes / 60);
+                    var days = Math.floor(hours / 24);
+                    if (days > 0) {
+                        waitingText = days + 'd ' + (hours % 24) + 'h';
+                    } else if (hours > 0) {
+                        waitingText = hours + 'h ' + (minutes % 60) + 'm';
+                    } else if (minutes > 0) {
+                        waitingText = minutes + 'm';
+                    } else {
+                        waitingText = 'Just now';
+                    }
+                }
+                var statusClass = ev.event === 'Entry' ? 'status-waiting' : 'status-exit';
+                var statusLabel = ev.event === 'Entry' ? 'Waiting' : 'Exit';
+                var waitingHtml = ev.event === 'Entry' ? '<span class="up-next-waiting"><i class="ri-time-line"></i> ' + waitingText + '</span>' : '';
                 $upNextList.append(
                     '<div class="up-next-item">' +
                     '<span class="up-next-turn">#' + ev.turn + '</span>' +
                     '<span class="up-next-truck">' + ev.fleetNumber + '</span>' +
-                    '<span class="up-next-badge badge-entry">' + ev.event + '</span>' +
+                    '<span class="up-next-status ' + statusClass + '">' + statusLabel + '</span>' +
+                    waitingHtml +
                     '</div>'
                 );
             });
@@ -276,13 +326,13 @@ $(document).ready(function () {
                     '<span class="datetime-sep"> | </span>' +
                     '<span class="datetime-time">' + new Date(ev.eventTimestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) + '</span>',
                     actionHtml,
-                    ev.calledNow ? '0' : ev.turn   
+                    ev.calledNow ? '0' : ev.turn
                 ];
                 fleetTable.row.add(rowData);
             });
         }
-         
-        fleetTable.draw(); 
+
+        fleetTable.draw();
     }
 
     function recalculateTurnNumbers() {
@@ -360,7 +410,7 @@ $(document).ready(function () {
 
     // ── 8. Initialize DataTable and load initial data ──
     initializeDataTable();
-    refreshDashboardData();   
+    refreshDashboardData();
 
 
     window.refreshDashboardData = refreshDashboardData;

@@ -1,9 +1,21 @@
 ﻿@model TruckQueuingDashboard.Application.DTOs.DashboardViewModel
 @{
-    Layout = "_Layout";   
+    Layout = "_Layout";
     ViewData["Title"] = "Truck Queuing Dashboard";
+     
+        string FormatWaitingTime(TimeSpan time)
+    {
+        if (time.TotalSeconds < 60)
+            return "Just now";
+        else if (time.TotalMinutes < 60)
+            return $"{(int)time.TotalMinutes}m";
+        else if (time.TotalHours < 24)
+            return $"{(int)time.TotalHours}h {(int)time.Minutes}m";
+        else
+            return $"{(int)time.TotalDays}d {(int)time.Hours}h";
+    }
 }
-
+     
 @section Styles {
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="~/css/dispatcher.css" asp-append-version="true" />
@@ -17,56 +29,58 @@
 
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-}
-
+}             
+       
 <div class="container-fluid py-3">
-    <div class="row">
+    <div class="row"> 
         <div class="col-12">
-
+             
             <div class="clinic-queue">
                 <!-- Left Column: Bays & Up Next -->
                 <div class="queue-stats">
-                    @{
+                        
+                    @{   
                         int bayCount = Model.MaxBays > 0 ? Model.MaxBays : 2;
-
-                        // 🔴 Queue is already sorted (CalledNow first by order, then remaining)
                         var queue = Model.FleetEvents ?? new List<FleetEventDto>();
-
-                        // Bays: Take first 'bayCount' items from the queue
                         var bayTrucks = queue.Take(bayCount).ToList();
-
-                        // Up Next: Take next 2 items after bays
-                        var upNext = queue.Skip(bayCount).Take(2).ToList();
+                        var upNext = queue.Skip(bayCount).Take(4).ToList();
                     }
-
-                    @for (int i = 0; i < bayCount; i++)
-                    {
-                        var bay = bayTrucks.ElementAtOrDefault(i);
-                        <div class="now-serving-ticket primary @(bay?.CalledNow == true ? "called-now" : "")">
-                            <span class="serving-label">
-                                @if (bay?.CalledNow == true)
-                                {
-                                    <i class="ri-star-fill me-1"></i>
-                                }
-                                Bay @(i + 1)
-                                @if (bay?.CalledNow == true)
-                                {
-                                    <span class="called-badge">★ #@bay.CalledNowOrder</span>
-                                }
-                            </span>
-                            <span class="serving-number">
-                                @if (bay != null)
-                                {
-                                    <text>@bay.FleetNumber</text>
-                                    <small class="serving-turn">Turn @bay.Turn</small>
-                                }
-                                else
-                                {
-                                    <span>—</span>
-                                }
-                            </span>
+                     
+                    <!-- ─── Now Serving Card ─── -->
+                    <div class="now-serving-card">
+                        <div class="now-serving-header">
+                             Now Serving                            
                         </div>
-                    }
+                         
+                        @for (int i = 0; i < bayCount; i++)
+                        {
+                            var bay = bayTrucks.ElementAtOrDefault(i);
+                            <div class="now-serving-ticket primary @(bay?.CalledNow == true ? "called-now" : "")">
+                                <span class="serving-label">
+                                    @if (bay?.CalledNow == true)
+                                    {
+                                        <i class="ri-star-fill me-1"></i>
+                                    }
+                                    Bay @(i + 1)
+                                    @if (bay?.CalledNow == true)
+                                    {
+                                        <span class="called-badge">★ #@bay.CalledNowOrder</span>
+                                    }
+                                </span>
+                                <span class="serving-number">
+                                    @if (bay != null)
+                                    {
+                                        <text>@bay.FleetNumber</text>
+                                        <small class="serving-turn">Turn @bay.Turn</small>
+                                    }
+                                    else
+                                    {
+                                        <span>—</span>
+                                    }
+                                </span>
+                            </div>
+                        }
+                    </div>
 
                     <!-- Up Next -->
                     <div class="now-serving-ticket secondary">
@@ -76,23 +90,57 @@
                             {
                                 foreach (var ev in upNext)
                                 {
-                                    <div class="up-next-item">
+                                    var timeWaiting = DateTime.Now - ev.EventTimestamp;
+                                    string waitingText = FormatWaitingTime(timeWaiting);
+
+                                    <div class="up-next-item" data-timestamp="@ev.EventTimestamp.ToString("yyyy-MM-dd HH:mm:ss")">
                                         <span class="up-next-turn">#@ev.Turn</span>
                                         <span class="up-next-truck">@ev.FleetNumber</span>
-                                        <span class="up-next-badge @(ev.Event == "Entry" ? "badge-entry" : "badge-exit")">
-                                            @ev.Event
+                                        <span class="up-next-status @(ev.Event == "Entry" ? "status-waiting" : "status-exit")">
+                                            @(ev.Event == "Entry" ? "Waiting" : "Exit")
                                         </span>
+                                        @if (ev.Event == "Entry")
+                                        {
+                                            <span class="up-next-waiting"><i class="ri-time-line"></i> @waitingText</span>
+                                        }
+                                    </div>
+                                }
+                            }
+                            else 
+                            {
+                                <div class="up-next-item empty">— No more trucks —</div>
+                            }
+                        </div>
+                    </div>   
+                       
+                          
+                    <!-- Recent Exits -->
+                    <div class="recent-exits-card">
+                        <div class="recent-exits-header">
+                             Recent Exits
+                        </div>
+                        <div class="recent-exits-list">
+                            @if (Model.RecentExits != null && Model.RecentExits.Any())
+                            {
+                                foreach (var exit in Model.RecentExits)
+                                {
+                                    <div class="recent-exit-item">
+                                        <span class="recent-exit-truck">@exit.FleetNumber</span>
+                                        <span class="recent-exit-time">@exit.EventTimestamp.ToString("HH:mm")</span>
                                     </div>
                                 }
                             }
                             else
                             {
-                                <div class="up-next-item empty">— No more trucks —</div>
+                                <div class="recent-exit-item empty">— No recent exits —</div>
                             }
                         </div>
                     </div>
-                </div>
 
+
+
+
+                </div>
                 <!-- Right Column: Waiting List -->
                 <div class="waiting-list">
                     <div class="waiting-header">
@@ -115,11 +163,10 @@
                                     <th>Status</th>
                                     <th>Timestamp</th>
                                     <th class="action-col">Action</th>
-                                    <th style="display:none;">SortOrder</th>  
+                                    <th style="display:none;">SortOrder</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            
                             </tbody>
                         </table>
                     </div>
@@ -128,9 +175,9 @@
         </div>
     </div>
 </div>
-
+  
 <!-- History Modal -->
-<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-scroll="false">
     <div class="modal-dialog modal-dialog-scrollable modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -144,6 +191,11 @@
                         <span class="history-total-count" id="historyTotalCount">0</span>
                     </div>
                     <div class="d-flex align-items-center gap-2">
+                        <!-- Search Input -->
+                        <div class="history-filter-group">
+                            <label for="historySearch" class="history-filter-label">Search:</label>
+                            <input type="text" id="historySearch" class="history-search-input" placeholder="Search trucks, events..." />
+                        </div> 
                         <div class="history-filter-group">
                             <label for="historyFromDate" class="history-filter-label">From:</label>
                             <input type="text" id="historyFromDate" class="history-date-input" placeholder="Select date">
@@ -210,4 +262,4 @@
 
     <!-- Dashboard JS -->
     <script src="~/js/dispatcher.js" asp-append-version="true"></script>
-}
+} 

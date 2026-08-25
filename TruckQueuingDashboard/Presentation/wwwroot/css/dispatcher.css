@@ -21,7 +21,7 @@ body.dashboard-page {
 }
 
 .waiting-list {
-    max-height: calc(100vh - 200px) !important;
+    max-height: calc(106vh - 200px) !important;
     overflow: hidden !important;
 }
 
@@ -66,7 +66,41 @@ body.dashboard-page {
 /* ──────────────────────────────────────────────────────
    NOW SERVING / UP NEXT TICKETS
    ────────────────────────────────────────────────────── */
+/* ─── "Now Serving" Badge ────────────────────────────────────────── */
+.queue-stats h2 {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #41598c !important;
+    background: #eef4fb !important;
+    display: inline-block !important;
+    padding: 0.15rem 0.8rem !important;
+    border-radius: 2rem !important;
+    margin: 0 0 0.4rem 0 !important;
+    border: 1px solid #dbeafe !important;
+    line-height: 1.6 !important;
+}
 
+    /* ─── Optional: Add a small dot for live indicator ─── */
+    .queue-stats h2::before {
+        content: "●";
+        color: #10b981;
+        margin-right: 0.4rem;
+        font-size: 0.9rem;
+        display: inline-block;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
 .now-serving-ticket {
     display: inline-block !important;
     background: #41598c !important;
@@ -84,16 +118,17 @@ body.dashboard-page {
         color: #fff !important;
         padding: 1.2rem 1rem !important;
         border-radius: 1.5rem !important;
+
     }
 
-    .now-serving-ticket.secondary {
+/*    .now-serving-ticket.secondary {
         background: #f8faff !important;
         color: #fff !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
         border: 1px solid #eef2f6 !important;
         padding: 0.8rem 1rem !important;
         border-radius: 1.2rem !important;
-    }
+    }*/
 
 .serving-label {
     display: block !important;
@@ -181,6 +216,33 @@ body.dashboard-page {
     background: transparent !important;
     border: none !important;
     font-size: 0.75rem !important;
+}
+
+/* ─── Up Next Waiting Time ─── */
+.up-next-waiting {
+    font-size: 0.6rem !important;
+    color: #64748b !important;
+    background: #f1f5f9 !important;
+    padding: 0.05rem 0.5rem !important;
+    border-radius: 2rem !important;
+    white-space: nowrap !important;
+    font-weight: 500 !important;
+    margin-left: 0.2rem !important;
+}
+
+.up-next-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    padding: 0.2rem 0.6rem !important;
+    background: #ffffff !important;
+    border-radius: 2rem !important;
+    border: 1px solid #eef2f6 !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+    white-space: nowrap !important;
+    flex-wrap: wrap !important; /* Allow wrap on small screens */
 }
 
 /* ── Action Buttons inside Now Serving ── */
@@ -615,7 +677,7 @@ body.dashboard-page {
 .clinic-queue {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 2rem !important;
+    gap: 1.5rem !important;
     padding: 0.5rem 0 !important;
 }
 
@@ -623,7 +685,7 @@ body.dashboard-page {
     flex: 0 0 240px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 1.5rem !important;
+
     align-self: flex-start !important;
 }
 
@@ -652,7 +714,61 @@ body.dashboard-page {
             font-size: 1.4rem;
         }
 
-/* ── Now Serving ── */
+/* ──────────────────────────────────────────────────────
+   NOW SERVING & UP NEXT
+   ────────────────────────────────────────────────────── */
+
+/* ─── Now Serving Card Wrapper ─── */
+.now-serving-card {
+    background: #f8faff !important;
+    border-radius: 1rem !important;
+    padding: 0.8rem 1rem !important;
+    border: 1px solid #eef2f6 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    margin-bottom: 0.6rem !important;
+}
+
+.now-serving-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #64748b !important;
+    margin-bottom: 0.6rem !important;
+    padding-bottom: 0.4rem !important;
+    border-bottom: 1px solid #eef2f6 !important;
+}
+
+    .now-serving-header i {
+        font-size: 0.7rem !important;
+        color: #41598c !important;
+    }
+
+.now-serving-badge {
+    font-size: 0.45rem !important;
+    font-weight: 600 !important;
+    color: #10b981 !important;
+    background: #d1fae5 !important;
+    padding: 0.05rem 0.5rem !important;
+    border-radius: 2rem !important;
+    margin-left: auto !important;
+    animation: pulse-dot 1.5s ease-in-out infinite !important;
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* ─── Now Serving Bay Cards (Primary) ─── */
 .now-serving-ticket.primary {
     background: #41598c !important;
     color: #fff !important;
@@ -689,26 +805,217 @@ body.dashboard-page {
         margin-top: 0.1rem !important;
     }
 
-/* ── Up Next ── */
+/* ─── Spacing inside the wrapper ─── */
+.now-serving-card .now-serving-ticket.primary {
+    margin-bottom: 0.4rem !important;
+}
+
+    .now-serving-card .now-serving-ticket.primary:last-child {
+        margin-bottom: 0 !important;
+    }
+
+/* ─── Called Now State (Primary) ─── */
+.now-serving-ticket.primary.called-now {
+    background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%) !important;
+    box-shadow: 0 4px 20px rgba(255, 193, 7, 0.4) !important;
+}
+
+    .now-serving-ticket.primary.called-now .serving-number,
+    .now-serving-ticket.primary.called-now .serving-label,
+    .now-serving-ticket.primary.called-now .serving-turn {
+        color: #1e293b !important;
+    }
+
+    .now-serving-ticket.primary.called-now .called-badge {
+        background: rgba(0,0,0,0.15) !important;
+        color: #1e293b !important;
+    }
+
+/* ─── Up Next Container (Secondary) ─── */
 .now-serving-ticket.secondary {
     background: #f8faff !important;
-    color: #1e293b !important;
+    border-radius: 1rem !important;
     padding: 0.8rem 1rem !important;
-    border-radius: 1.2rem !important;
     border: 1px solid #eef2f6 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    text-align: center !important;
-    width: 100% !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
 }
 
     .now-serving-ticket.secondary .serving-label {
-        display: block !important;
-        font-size: 0.65rem !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color: #94a3b8 !important;
-        margin-bottom: 0.4rem !important;
+        letter-spacing: 0.06em !important;
+        color: #64748b !important;
+        margin-bottom: 0.6rem !important;
+        display: block !important;
+        text-align:left;
+        display:flex;
+        
     }
+
+/* ─── Up Next List ─── */
+.up-next-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    margin-top: 0.2rem !important;
+}
+
+/* ─── Each Up Next Item ─── */
+.up-next-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.6rem !important;
+    background: #ffffff !important;
+    padding: 0.4rem 0.8rem !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid #eef2f6 !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+}
+
+    .up-next-item:hover {
+        background: #f5f8fc !important;
+        border-color: #41598c !important;
+        box-shadow: 0 2px 8px rgba(65, 89, 140, 0.08) !important;
+        transform: translateY(-1px);
+    }
+
+/* ── Up Next Turn Number ── */
+.up-next-turn {
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    color: #41598c !important;
+    min-width: 2.2rem !important;
+    background: #eef4fb !important;
+    padding: 0.1rem 0.4rem !important;
+    border-radius: 2rem !important;
+    text-align: center !important;
+}
+
+/* ── Up Next Truck Number ── */
+.up-next-truck {
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    color: #1e293b !important;
+    flex: 1 !important;
+}
+
+/* ── Up Next Status Badge ── */
+.up-next-status {
+    font-size: 0.55rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    padding: 0.1rem 0.6rem !important;
+    border-radius: 2rem !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+}
+
+    .up-next-status.status-waiting {
+        background: #d1fae5 !important;
+        color: #065f46 !important;
+    }
+
+    .up-next-status.status-exit {
+        background: #fee2e2 !important;
+        color: #991b1b !important;
+    }
+
+/* ── Up Next Waiting Time ── */
+.up-next-waiting {
+    font-size: 0.7rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    background: #f1f5f9 !important;
+    padding: 0.05rem 0.6rem !important;
+    border-radius: 2rem !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.2rem !important;
+}
+
+/* ─── Empty State ─── */
+.up-next-item.empty {
+    color: #94a3b8 !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px dashed #e2e8f0 !important;
+    font-size: 0.8rem !important;
+    padding: 0.6rem !important;
+}
+
+/* ─── Recent Exits Card ─── */
+.recent-exits-card {
+    background: #f8faff !important;
+    border-radius: 1rem !important;
+    padding: 0.8rem 1rem !important;
+    border: 1px solid #eef2f6 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    margin-top: 0.6rem !important;
+}
+
+.recent-exits-header {
+    display: flex !important;
+    align-items: center !important;
+    text-align:left;
+    gap: 0.5rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #64748b !important;
+    margin-bottom: 0.6rem !important;
+    padding-bottom: 0.4rem !important;
+    border-bottom: 1px solid #eef2f6 !important;
+}
+
+    .recent-exits-header i {
+        font-size: 0.7rem !important;
+        color: #41598c !important;
+    }
+
+.recent-exits-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+}
+
+.recent-exit-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    padding: 0.2rem 0.6rem !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid #eef2f6 !important;
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: #1e293b !important;
+}
+
+.recent-exit-truck {
+    font-weight: 700 !important;
+    color: #1e293b !important;
+}
+
+.recent-exit-time {
+    font-size: 0.8rem !important;
+    color: #94a3b8 !important;
+    background: #f1f5f9 !important;
+    padding: 0.05rem 0.6rem !important;
+    border-radius: 2rem !important;
+}
+
+.recent-exit-item.empty {
+    color: #94a3b8 !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px dashed #e2e8f0 !important;
+    font-size: 0.75rem !important;
+    padding: 0.4rem !important;
+}
 
 
 /* ──────────────────────────────────────────────────────
@@ -1245,6 +1552,48 @@ body.dashboard-page {
         .event-badge:hover {
             transform: none !important;
             box-shadow: none !important;
+        }
+    /* ─── History Search Input ─── */
+    .history-filter-group {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+    }
+
+    .history-filter-label {
+        font-size: 0.7rem !important;
+        font-weight: 500 !important;
+        color: #475569 !important;
+        white-space: nowrap !important;
+        margin-bottom: 0 !important;
+    }
+
+    .history-search-input {
+        border: 1px solid #ced4da !important;
+        border-radius: 0.375rem !important;
+        padding: 0.2rem 0.6rem !important;
+        font-size: 0.75rem !important;
+        background: #ffffff !important;
+        transition: all 0.2s ease !important;
+        outline: none !important;
+        min-width: 160px !important;
+        max-width: 220px !important;
+        color: #1e293b !important;
+        height: 30px !important;
+    }
+
+        .history-search-input:focus {
+            border-color: #41598c !important;
+            box-shadow: 0 0 0 3px rgba(65, 89, 140, 0.12) !important;
+            background: #ffffff !important;
+        }
+
+        .history-search-input::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        .history-search-input:hover {
+            border-color: #94a3b8 !important;
         }
 }
 
@@ -2299,7 +2648,7 @@ body.dashboard-page {
 
 .queue-stats {
     display: flex;
-    gap: 1.2rem;
+
 }
 
 .stat-badge {
@@ -2540,6 +2889,7 @@ body.dashboard-page {
             .queue-card .btn-action.revert:hover {
                 background: #fef3c7;
             }
+
 /* ──────────────────────────────────────────────────────────────────
    END OF CSS
    ────────────────────────────────────────────────────────────────── */

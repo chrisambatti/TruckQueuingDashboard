@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TruckQueuingDashboard.Application.DTOs;
-using TruckQueuingDashboard.Models;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TruckQueuingDashboard.Domain.Constants;
+using TruckQueuingDashboard.Application.DTOs;
 using TruckQueuingDashboard.Application.DTOs;
 using TruckQueuingDashboard.Application.Interfaces.Services;
+using TruckQueuingDashboard.Domain.Constants;
+using TruckQueuingDashboard.Models;
 
 namespace TruckQueuingDashboard.Presentation.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly IFleetService _service;
@@ -41,7 +43,8 @@ namespace TruckQueuingDashboard.Presentation.Controllers
                 {
                     FleetEvents = fleetData.FleetEvents ?? new List<FleetEventDto>(),
                     FleetSummary = fleetData.FleetSummary ?? new FleetSummaryDto(),
-                    MaxBays = _maxBays
+                    MaxBays = _maxBays,
+                    RecentExits = fleetData.RecentExits ?? new List<FleetEventDto>()
                 };
 
                 return View(viewModel);
@@ -52,7 +55,8 @@ namespace TruckQueuingDashboard.Presentation.Controllers
                 {
                     FleetEvents = new List<FleetEventDto>(),
                     FleetSummary = new FleetSummaryDto(),
-                    MaxBays = _maxBays
+                    MaxBays = _maxBays,
+                    RecentExits = new List<FleetEventDto>()
                 };
                 return View(viewModel);
             }
@@ -116,6 +120,39 @@ namespace TruckQueuingDashboard.Presentation.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, error = ex.Message });
+            }
+        }
+
+        // ─── TV/Driver View ───────────────────────────────────────────────
+        public async Task<IActionResult> DispatcherTV()
+        {
+            try
+            {
+                var username = User?.Identity?.Name ?? "System";
+                await _service.ProcessFleetFilesAsync(_fleetFolderPath, username);
+
+                var fleetData = await _service.GetFleetDashboardDataAsync();
+
+                var viewModel = new DashboardViewModel
+                {
+                    FleetEvents = fleetData.FleetEvents ?? new List<FleetEventDto>(),
+                    FleetSummary = fleetData.FleetSummary ?? new FleetSummaryDto(),
+                    MaxBays = _maxBays,
+                    RecentExits = fleetData.RecentExits ?? new List<FleetEventDto>()
+                };
+
+                return View(viewModel);
+            }
+            catch
+            {
+                var viewModel = new DashboardViewModel
+                {
+                    FleetEvents = new List<FleetEventDto>(),
+                    FleetSummary = new FleetSummaryDto(),
+                    MaxBays = _maxBays,
+                    RecentExits = new List<FleetEventDto>()
+                };
+                return View(viewModel);
             }
         }
     }

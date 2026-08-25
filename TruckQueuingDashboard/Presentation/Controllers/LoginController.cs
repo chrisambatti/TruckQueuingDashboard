@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 
 namespace TruckQueuingDashboard.Presentation.Controllers
 {
+    [AllowAnonymous]
     public class LoginController : Controller
     {
         // Simple user store – replace with database query later
