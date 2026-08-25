@@ -252,6 +252,19 @@
     </div>
 </div>
 
+<!-- Toast Container (positioned top-right of viewport) -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; pointer-events: none;">
+    <div id="dateValidationToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" style="pointer-events: auto;">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="ri-error-warning-line me-2"></i>
+                <span id="toastMessage">To date must be on or after the From date.</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -262,4 +275,97 @@
 
     <!-- Dashboard JS -->
     <script src="~/js/dispatcher.js" asp-append-version="true"></script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ─── 1. Get the modal and inputs ───
+            const modal = document.getElementById('historyModal');
+            const fromInput = document.getElementById('historyFromDate');
+            const toInput = document.getElementById('historyToDate');
+
+            if (!modal || !fromInput || !toInput) return;
+
+            // ─── 2. Toast setup ───
+            const toastEl = document.getElementById('dateValidationToast');
+            const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 4000 });
+
+            function showToast(msg) {
+                document.getElementById('toastMessage').textContent = msg;
+                toast.show();
+            }
+
+            // ─── 3. Flatpickr instances with maxDate = today ───
+            let fromPicker, toPicker;
+
+            function initDatePickers() {
+                // Destroy any existing instances to avoid duplicates
+                if (fromPicker) fromPicker.destroy();
+                if (toPicker) toPicker.destroy();
+
+                fromPicker = flatpickr(fromInput, {
+                    dateFormat: "d-m-Y",
+                    maxDate: "today", // ⬅️ Disable future dates
+                    onChange: function (selectedDates, dateStr, instance) {
+                        const toVal = toInput.value;
+                        if (toVal) {
+                            const fromDate = selectedDates[0];
+                            const toDate = parseDate(toVal);
+                            if (toDate && fromDate > toDate) {
+                                showToast('From date cannot be later than To date.');
+                                instance.clear();
+                            }
+                        }
+                    }
+                });
+
+                toPicker = flatpickr(toInput, {
+                    dateFormat: "d-m-Y",
+                    maxDate: "today", // ⬅️ Disable future dates
+                    onChange: function (selectedDates, dateStr, instance) {
+                        const fromVal = fromInput.value;
+                        if (fromVal) {
+                            const toDate = selectedDates[0];
+                            const fromDate = parseDate(fromVal);
+                            if (fromDate && toDate < fromDate) {
+                                showToast('To date cannot be older than From date.');
+                                instance.clear();
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ─── Helper: parse a date string in "d-m-Y" format ───
+            function parseDate(str) {
+                if (!str) return null;
+                const parts = str.split('-');
+                if (parts.length !== 3) return null;
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10);
+                return new Date(year, month, day);
+            }
+
+            // ─── 4. Initialize when the modal is shown ───
+            modal.addEventListener('shown.bs.modal', function () {
+                initDatePickers();
+            });
+
+            // If modal is already visible (e.g., on page load after refresh), init immediately
+            if (modal.classList.contains('show')) {
+                initDatePickers();
+            }
+
+            // ─── 5. Clean up when modal is hidden ───
+            modal.addEventListener('hidden.bs.modal', function () {
+                if (fromPicker) fromPicker.destroy();
+                if (toPicker) toPicker.destroy();
+                fromPicker = null;
+                toPicker = null;
+            });
+        });
+    </script>
 } 
