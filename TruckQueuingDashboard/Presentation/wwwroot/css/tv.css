@@ -594,6 +594,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    grid-column: 2;
 }
 
 
@@ -602,13 +603,23 @@ body {
    ========================================================= */
 
 .tv-upnext-status {
-    justify-self: end;
-    padding: 4px 7px;
+    position: absolute;
+    top: clamp(14px, 1vw, 22px);
+    right: clamp(14px, 1vw, 22px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    max-width: max-content;
+    padding: 6px 12px;
+    background: #dcf8ee;
+    color: #087354;
     border-radius: 999px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
+    font-size: clamp(10px, 0.6vw, 14px);
+    font-weight: 700;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 
@@ -636,6 +647,7 @@ body {
     color: #000;
     font-size: 14px;
     font-weight: 600;
+    grid-column: 2;
 }
 
 
@@ -1155,5 +1167,223 @@ body {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+
+
+/* =========================================================
+   TV / MONITOR ADAPTIVE LAYOUT
+   Designed for 1080p → 4K displays
+   ========================================================= */
+
+@media (min-width: 1101px) {
+
+    .tv-grid {
+        padding: clamp(22px, 2vw, 40px) clamp(28px, 2vw, 48px);
+        gap: clamp(18px, 1.4vw, 28px);
+        /*
+         * Let the dashboard use the available vertical space
+         * instead of leaving a huge empty lower area.
+         */
+        grid-template-rows: auto auto minmax(0, 1fr);
+    }
+
+
+    /* ---------------------------------------------------------
+       SECTION TITLES
+       --------------------------------------------------------- */
+
+    .tv-section-title {
+        margin-bottom: clamp(12px, 0.8vw, 18px);
+        font-size: clamp(14px, 0.85vw, 20px);
+        letter-spacing: 0.07em;
+    }
+
+
+    /* ---------------------------------------------------------
+       NOW SERVING
+       --------------------------------------------------------- */
+
+    .tv-bays {
+        /*
+         * Only two bays exist.
+         * Remove the unnecessary third column.
+         */
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+        width: min(100%, 1100px);
+        gap: clamp(18px, 1.3vw, 30px);
+    }
+
+
+    .tv-bay-card {
+        min-height: clamp(190px, 18vh, 280px);
+        padding: clamp(24px, 2vw, 40px);
+        border-radius: clamp(14px, 1vw, 20px);
+    }
+
+
+    .tv-bay-label {
+        margin-bottom: clamp(10px, 0.8vw, 16px);
+        font-size: clamp(12px, 0.7vw, 17px);
+    }
+
+
+    .tv-bay-fleet {
+        font-size: clamp(52px, 4vw, 82px);
+        letter-spacing: -0.04em;
+    }
+
+
+    .tv-bay-turn {
+        margin-top: clamp(12px, 0.8vw, 18px);
+        font-size: clamp(15px, 0.85vw, 20px);
+    }
+
+
+    /* ---------------------------------------------------------
+       LIVE QUEUE
+       --------------------------------------------------------- */
+
+    .tv-waiting-scroll {
+        gap: clamp(12px, 0.8vw, 20px);
+        padding: 3px 3px 10px;
+        /*
+         * Don't let the scrollbar dominate a TV display.
+         */
+        scrollbar-width: thin;
+    }
+
+
+    .tv-waiting-item {
+        flex: 0 0 clamp(190px, 11vw, 260px);
+        min-height: clamp(135px, 13vh, 190px);
+        padding: clamp(18px, 1.1vw, 28px);
+        border-radius: clamp(12px, 0.8vw, 18px);
+    }
+
+
+    .tv-waiting-turn {
+        font-size: clamp(13px, 0.75vw, 18px);
+        margin-bottom: clamp(6px, 0.4vw, 10px);
+    }
+
+
+    .tv-waiting-truck {
+        font-size: clamp(24px, 1.55vw, 34px);
+    }
+
+
+    .tv-waiting-status {
+        margin-top: clamp(11px, 0.7vw, 16px);
+    }
+
+
+        .tv-waiting-status span {
+            padding: clamp(5px, 0.35vw, 8px) clamp(9px, 0.55vw, 14px);
+            font-size: clamp(10px, 0.6vw, 14px);
+        }
+
+
+    .tv-waiting-time {
+        margin-top: clamp(11px, 0.7vw, 16px);
+        font-size: clamp(13px, 0.75vw, 17px);
+    }
+
+
+        .tv-waiting-time i {
+            font-size: clamp(14px, 0.75vw, 18px);
+        }
+
+
+    /* ---------------------------------------------------------
+       UP NEXT
+       --------------------------------------------------------- */
+
+    .tv-upnext {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+
+    .tv-upnext-list {
+        width: 100%;
+        height: auto;
+        min-height: clamp(150px, 18vh, 230px);
+        padding: clamp(10px, 0.7vw, 16px);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: 1fr;
+        gap: clamp(10px, 0.7vw, 18px);
+        border-radius: clamp(14px, 1vw, 20px);
+    }
+
+
+    .tv-upnext-item {
+        min-height: clamp(110px, 12vh, 170px);
+        padding: clamp(14px, 1vw, 24px);
+        grid-template-columns: clamp(42px, 2.5vw, 58px) minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        column-gap: clamp(10px, 0.7vw, 16px);
+        border-radius: clamp(10px, 0.7vw, 16px);
+        position: relative;
+    }
+
+
+    .tv-upnext-turn {
+        width: clamp(40px, 2.5vw, 56px);
+        height: clamp(40px, 2.5vw, 56px);
+        font-size: clamp(15px, 0.9vw, 21px);
+    }
+
+
+    .tv-upnext-truck {
+        font-size: clamp(16px, 1vw, 23px);
+        font-weight: 700;
+    }
+
+
+    .tv-upnext-status {
+        padding: clamp(5px, 0.35vw, 8px) clamp(9px, 0.55vw, 14px);
+        font-size: clamp(10px, 0.6vw, 14px);
+    }
+
+
+    .tv-upnext-waiting {
+        grid-column: 2;
+        font-size: clamp(13px, 0.75vw, 17px);
+    }
+}
+
+@media (min-width: 1101px) and (max-height: 850px) {
+
+    .tv-grid {
+        padding-top: 16px;
+        padding-bottom: 16px;
+        gap: 14px;
+    }
+
+    .tv-section-title {
+        margin-bottom: 8px;
+    }
+
+    .tv-bay-card {
+        min-height: 155px;
+        padding: 18px;
+    }
+
+    .tv-bay-fleet {
+        font-size: clamp(46px, 4vw, 64px);
+    }
+
+    .tv-waiting-item {
+        min-height: 110px;
+    }
+
+    .tv-upnext-list {
+        min-height: 125px;
+    }
+
+    .tv-upnext-item {
+        min-height: 90px;
     }
 }

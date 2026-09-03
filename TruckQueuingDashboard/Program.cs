@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -11,10 +9,28 @@ using TruckQueuingDashboard.Infrastructure.Data;
 using TruckQueuingDashboard.Infrastructure.Hubs;
 using TruckQueuingDashboard.Infrastructure.Repositories;
 using TruckQueuingDashboard.Infrastructure.Services;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+//var builder = WebApplication.CreateBuilder(args);
 
-// ─── 1. Add services to the container ───────────────────────────────
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.File(
+        Path.Combine(AppContext.BaseDirectory, "Logs", "app-.log"),
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7,
+        shared: true)
+    .CreateLogger();
+
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    WebRootPath = Path.Combine("Presentation", "wwwroot")
+});
+
+builder.Host.UseSerilog();
+
+// ─── 1. Register MVC (required for controllers) ────────────────────
 builder.Services.AddControllersWithViews();
 
 // ─── 2. Tell ASP.NET Core where to find views ──────────────────────
@@ -25,46 +41,30 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
     options.ViewLocationFormats.Add("/Presentation/Views/Shared/{0}" + RazorViewEngine.ViewExtension);
 });
 
-// ─── 3. Authentication (Cookie) ─────────────────────────────────────
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Login/Index";
-        options.LogoutPath = "/Login/Logout";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
-    });
-
-// ─── 4. Authorization (Fallback policy – require authenticated users) ──
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
-
-// ─── 5. Database Context ────────────────────────────────────────────
+// ─── 3. Database Context ────────────────────────────────────────────
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ─── 6. Repositories & Services ─────────────────────────────────────
+// ─── 4. Repositories & Services ─────────────────────────────────────
 builder.Services.AddScoped<IFleetRepository, FleetRepository>();
 builder.Services.AddScoped<IFleetService, FleetService>();
 
-// ─── 7. Background Service (File Watcher) ──────────────────────────
+// ─── 5. Background Service (File Watcher) ──────────────────────────
 builder.Services.AddHostedService<FleetFileWatcherService>();
 
-// ─── 8. SignalR ──────────────────────────────────────────────────────
+// ─── 6. SignalR ──────────────────────────────────────────────────────
 builder.Services.AddSignalR();
 
-// ─── 9. Session & HttpContext Accessor ─────────────────────────────
+// ─── 7. Session & HttpContext Accessor ─────────────────────────────
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
+// ─── 8. Authentication / Authorization – REMOVED ───────────────────
+
 var app = builder.Build();
 
-// ─── 10. Configure the HTTP request pipeline ────────────────────────
+// ─── 9. Configure HTTP pipeline ─────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -73,29 +73,29 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ─── 11. Serve static files from Presentation/wwwroot ──────────────
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(app.Environment.ContentRootPath, "Presentation", "wwwroot"))
-});
+// ─── 10. Serve static files from Presentation/wwwroot ──────────────
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(
+//        Path.Combine(app.Environment.ContentRootPath, "Presentation", "wwwroot"))
+//});
+
+app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseSession();
-app.UseAuthentication();   // Must be before UseAuthorization
-app.UseAuthorization();
 
-// ─── 12. Map static assets (optional) ──────────────────────────────
+// ─── 11. Map static assets (optional) ──────────────────────────────
 app.MapStaticAssets();
 
-// ─── 13. Default route – now points to Login/Index ─────────────────
+// ─── 12. Default route – change to a public controller ─────────────
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}")
+    pattern: "{controller=Dashboard}/{action=Dispatcher}/{id?}")
     .WithStaticAssets();
 
-// ─── 14. SignalR Hub ─────────────────────────────────────────────────
+// ─── 13. SignalR Hub ─────────────────────────────────────────────────
 app.MapHub<FleetHub>("/fleetHub");
 
 app.Run();

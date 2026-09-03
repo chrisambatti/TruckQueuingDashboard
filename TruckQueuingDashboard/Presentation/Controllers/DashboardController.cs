@@ -11,7 +11,7 @@ using TruckQueuingDashboard.Models;
 
 namespace TruckQueuingDashboard.Presentation.Controllers
 {
-    [Authorize]
+
     public class DashboardController : Controller
     {
         private readonly IFleetService _service;

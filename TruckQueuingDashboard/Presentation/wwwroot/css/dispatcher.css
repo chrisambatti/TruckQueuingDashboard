@@ -1061,360 +1061,540 @@ body.dashboard-page {
     background:#fff !important;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ============================================================
    HISTORY MODAL
-   ────────────────────────────────────────────────────── */
-#historyModal .modal-content {
-    border: none !important;
-    border-radius: 1.25rem !important;
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.15) !important;
-    overflow: hidden !important;
+   ============================================================ */
+
+/* ---------- Modal ---------- */
+
+#historyModal .modal-dialog {
+    width: 95%;
+    max-width: 1400px;
+    margin: 1.5rem auto;
 }
+
+#historyModal .modal-content {
+    width: 100%;
+    border: 0;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.20);
+    overflow: hidden;
+    height: 900px;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
 
 #historyModal .modal-header {
-    border-bottom: 1px solid #eef2f6 !important;
-    padding: 1rem 1.5rem !important;
-    flex-shrink: 0 !important;
+    min-height: 62px;
+    padding: 14px 22px;
+    background: #ffffff;
+    border-bottom: 1px solid #e9edf3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-    #historyModal .modal-header .modal-title {
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
+#historyModal .modal-title {
+    margin: 0;
+    color: #1e293b;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#historyModal .btn-close,
+#historyModal .history-modal-close {
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    color: #64748b;
+    opacity: 1;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+    #historyModal .btn-close:hover,
+    #historyModal .history-modal-close:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+        transform: rotate(90deg);
     }
 
-#historyModal .modal-body {
-    max-height: 65vh !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+
+/* ============================================================
+   BODY
+   ============================================================ */
+
+#historyModal .modal-body,
+#historyModal .history-modal-body {
+    padding: 16px 22px 14px;
+    background: #ffffff;
+    /*
+       IMPORTANT:
+       Do not create a vertical scrolling container here.
+       The entire table should be visible.
+    */
+    max-height: none;
+    height: auto;
+    overflow: visible;
 }
+
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+#historyModal .history-modal-toolbar {
+    width: 100%;
+    min-height: 38px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#historyModal .history-total-label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#historyModal .history-total-count {
+    margin-left: 4px;
+    color: #41598c;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+/* ---------- Toolbar controls ---------- */
+
+#historyModal .history-modal-toolbar .d-flex {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+#historyModal .history-filter-label {
+    margin: 0;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#historyModal .history-date-input,
+#historyModal .history-filter-select {
+    height: 32px;
+    min-width: 110px;
+    padding: 4px 10px;
+    border: 1px solid #d7dee8;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #1e293b;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    #historyModal .history-date-input:focus,
+    #historyModal .history-filter-select:focus {
+        border-color: #41598c;
+        box-shadow: 0 0 0 3px rgba(65, 89, 140, 0.10);
+    }
+
+#historyModal .history-filter-select {
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   TABLE CONTAINER
+   ============================================================ */
+
+#historyModal .history-table-wrapper {
+    width: 100%;
+    /*
+       No vertical scrolling.
+       All records are rendered naturally.
+    */
+    max-height: none;
+    height: auto;
+    overflow-y: visible;
+    border: 1px solid #e7ecf2;
+    border-radius: 10px;
+    background: #ffffff;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+#historyModal .history-table {
+    width: 100%;
+    min-width: 850px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    background: #ffffff;
+    color: #1e293b;
+    font-size: 13px;
+}
+
+
+    /* ---------- Table header ---------- */
+
+    #historyModal .history-table thead th {
+        height: 38px;
+        padding: 8px 12px;
+        background: #f7f9fc;
+        color: #334155;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        text-align: left;
+        white-space: nowrap;
+        /*
+       Header does NOT need to be sticky because
+       the table itself is no longer vertically scrolling.
+    */
+        position: static;
+    }
+
+
+    /* ---------- Table rows ---------- */
+
+    #historyModal .history-table tbody tr {
+        height: 39px;
+    }
+
+    #historyModal .history-table tbody td {
+        height: 39px;
+        padding: 7px 12px;
+        background: #ffffff;
+        color: #1e293b;
+        border-bottom: 1px solid #edf1f5;
+        font-size: 13px;
+        font-weight: 400;
+        vertical-align: middle;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #historyModal .history-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    #historyModal .history-table tbody tr:hover td {
+        background: #f7f9fc;
+    }
+
+
+    /* ============================================================
+   COLUMN WIDTHS
+   ============================================================ */
+
+    /* Serial number */
+    #historyModal .history-table th:nth-child(1),
+    #historyModal .history-table td:nth-child(1) {
+        width: 8%;
+        min-width: 60px;
+        text-align: center;
+    }
+
+    /* Truck */
+    #historyModal .history-table th:nth-child(2),
+    #historyModal .history-table td:nth-child(2) {
+        width: 18%;
+        min-width: 100px;
+    }
+
+    /* Event */
+    #historyModal .history-table th:nth-child(3),
+    #historyModal .history-table td:nth-child(3) {
+        width: 16%;
+        min-width: 100px;
+    }
+
+    /* Location */
+    #historyModal .history-table th:nth-child(4),
+    #historyModal .history-table td:nth-child(4) {
+        width: 30%;
+        min-width: 180px;
+    }
+
+    /* Timestamp */
+    #historyModal .history-table th:nth-child(5),
+    #historyModal .history-table td:nth-child(5) {
+        width: 28%;
+        min-width: 190px;
+    }
+
+
+    /* ============================================================
+   EVENT BADGES
+   ============================================================ */
+
+    #historyModal .history-table .badge,
+    #historyModal .history-table .event-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 45px;
+        height: 21px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    #historyModal .history-table .badge-success,
+    #historyModal .history-table .event-entry {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    #historyModal .history-table .badge-danger,
+    #historyModal .history-table .event-exit {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+
+/* ============================================================
+   DATATABLES
+   ============================================================ */
+
+#historyModal .history-table-wrapper .dataTables_wrapper {
+    width: 100%;
+    overflow: visible;
+}
+
+#historyModal .history-table-wrapper .dataTables_scroll {
+    overflow: visible;
+}
+
+#historyModal .history-table-wrapper .dataTables_scrollBody {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+}
+
+#historyModal .history-table-wrapper .dataTables_info {
+    float: left;
+    clear: none;
+    margin: 8px 0 0;
+    padding: 0;
+    color: #64748b;
+    font-size: 11px;
+}
+
+#historyModal .history-table-wrapper .dataTables_paginate {
+    float: right;
+    margin-top: 5px;
+}
+
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+
+#historyModal .history-table-wrapper .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+    margin: 6px 0 0;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+    #historyModal .history-table-wrapper .pagination .page-item {
+        margin: 0;
+    }
+
+    #historyModal .history-table-wrapper .pagination .page-link {
+        min-width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 9px;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 500;
+        box-shadow: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+        #historyModal .history-table-wrapper .pagination .page-link:hover {
+            background: #eef2f7;
+            color: #1e293b;
+        }
+
+    #historyModal .history-table-wrapper .pagination .active .page-link {
+        background: #41598c;
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(65, 89, 140, 0.25);
+    }
+
+    #historyModal .history-table-wrapper .pagination .disabled .page-link {
+        color: #94a3b8;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
 
 #historyModal .modal-footer {
-    border-top: 1px solid #eef2f6 !important;
-    padding: 0.75rem 1.5rem 1rem !important;
-    background: #fafcff !important;
-    flex-shrink: 0 !important;
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 20 !important;
+    min-height: 64px;
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: #fafcff;
+    border-top: 1px solid #e9edf3;
+    /*
+       No sticky positioning.
+       It follows the complete 15-row table.
+    */
+    position: static;
 }
 
+    #historyModal .history-btn-close,
     #historyModal .modal-footer .btn {
-        border-radius: 2rem !important;
-        font-weight: 500 !important;
-        font-size: 0.9rem !important;
-        padding: 0.4rem 1.5rem !important;
+        min-width: 90px;
+        height: 34px;
+        padding: 5px 22px;
+        border: 0;
+        border-radius: 20px;
+        background: #41598c;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-.history-modal-content {
-    border: none !important;
-    border-radius: 1.5rem !important;
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.25) !important;
-    background: #ffffff !important;
-    overflow: hidden !important;
-}
-
-.history-modal-header {
-    background: #f8faff !important;
-    border-bottom: 1px solid #eef2f6 !important;
-    padding: 1rem 1.5rem !important;
-    flex-shrink: 0 !important;
-}
-
-.history-modal-title {
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    color: #1e293b !important;
-    letter-spacing: -0.01em !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-}
-
-    .history-modal-title i {
-        color: #41598c !important;
-        font-size: 1.3rem !important;
-    }
-
-.history-modal-close {
-    color: #94a3b8 !important;
-    opacity: 0.7 !important;
-    transition: all 0.2s ease !important;
-}
-
-    .history-modal-close:hover {
-        opacity: 1 !important;
-        transform: rotate(90deg) !important;
-    }
-
-.history-modal-body {
-    padding: 1.25rem 1.5rem 1.5rem !important;
-}
-
-/* ── Toolbar ── */
-.history-modal-toolbar {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 0.75rem !important;
-    margin-bottom: 0.75rem !important;
-}
-
-.history-total-label {
-    font-weight: 600 !important;
-    color: #1e293b !important;
-    font-size: 0.9rem !important;
-}
-
-.history-total-count {
-    font-weight: 700 !important;
-    color: #41598c !important;
-    font-size: 0.95rem !important;
-    margin-left: 0.3rem !important;
-}
-
-/* ── Filter Controls ── */
-.history-modal-toolbar .d-flex {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-}
-
-.history-filter-label {
-    font-size: 0.75rem !important;
-    font-weight: 500 !important;
-    color: #475569 !important;
-    white-space: nowrap !important;
-    margin-bottom: 0 !important;
-}
-
-.history-date-input {
-    border: 1px solid #ced4da !important;
-    border-radius: 0.375rem !important;
-    padding: 0.25rem 0.6rem !important;
-    font-size: 0.75rem !important;
-    background: #fff !important;
-    transition: all 0.2s ease !important;
-    outline: none !important;
-    min-width: 120px !important;
-    color: #1e293b !important;
-    height: 30px !important;
-}
-
-    .history-date-input:focus {
-        border-color: #41598c !important;
-        box-shadow: 0 0 0 3px rgba(51, 122, 183, 0.12) !important;
-    }
-
-    .history-date-input::-webkit-calendar-picker-indicator {
-        opacity: 0.6 !important;
-        padding: 0.2rem !important;
-        cursor: pointer !important;
-    }
-
-        .history-date-input::-webkit-calendar-picker-indicator:hover {
-            opacity: 1 !important;
+        #historyModal .history-btn-close:hover,
+        #historyModal .modal-footer .btn:hover {
+            background: #344a78;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(65, 89, 140, 0.20);
         }
 
-.history-filter-select {
-    border: 1px solid #ced4da !important;
-    border-radius: 0.375rem !important;
-    padding: 0.25rem 1.8rem 0.25rem 0.6rem !important;
-    font-size: 0.75rem !important;
-    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7a8f' d='M6 8L0 0h12z'/%3E%3C/svg%3E") no-repeat right 0.6rem center !important;
-    background-size: 10px !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-    outline: none !important;
-    min-width: 100px !important;
-    height: 30px !important;
-    color: #1e293b !important;
-}
-
-    .history-filter-select:hover {
-        border-color: #41598c !important;
-    }
-
-    .history-filter-select:focus {
-        border-color: #41598c !important;
-        box-shadow: 0 0 0 3px rgba(51, 122, 183, 0.12) !important;
-    }
-
-    .history-filter-select option {
-        font-weight: 400 !important;
-        padding: 0.25rem 0.5rem !important;
-    }
-
-/* ── History Table Wrapper ── */
-.history-table-wrapper {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    border-radius: 0.75rem !important;
-    border: 1px solid #eef2f6 !important;
-    min-height: 200px !important;
-    width: 100% !important;
-    display: block !important;
-}
-
-/* ── History Table ── */
-.history-table {
-    width: 100% !important;
-    min-width: 700px !important;
-    table-layout: fixed !important;
-    font-size: 0.85rem !important;
-    border-collapse: collapse !important;
-    background: #ffffff !important;
-    margin: 0 !important;
-}
-
-    .history-table thead th {
-        background: #f8faff !important;
-        border-bottom: 2px solid #e9edf4 !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        font-size: 0.65rem !important;
-        letter-spacing: 0.06em !important;
-        color: #1e293b !important;
-        padding: 0.6rem 0.8rem !important;
-        text-align: left !important;
-        white-space: nowrap !important;
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 10 !important;
-    }
-
-        .history-table thead th:first-child {
-            text-align: center !important;
+        #historyModal .history-btn-close:active,
+        #historyModal .modal-footer .btn:active {
+            transform: translateY(0);
         }
 
-    .history-table tbody td {
-        padding: 0.5rem 0.8rem !important;
-        border-bottom: 1px solid #f0f2f5 !important;
-        color: #1e293b !important;
-        background: #ffffff !important;
-        vertical-align: middle !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-        white-space: normal !important;
+table.dataTable thead > tr > th.sorting::before,
+table.dataTable thead > tr > th.sorting::after,
+table.dataTable thead > tr > th.sorting_asc::before,
+table.dataTable thead > tr > th.sorting_asc::after,
+table.dataTable thead > tr > th.sorting_desc:after,
+table.dataTable thead > tr > th.sorting:after {
+    top: 3%;
+    bottom: 97%;
+}
+
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 992px) {
+
+    #historyModal .modal-dialog {
+        width: 96%;
+        max-width: none;
+        margin: 1rem auto;
     }
 
-        .history-table tbody td:first-child {
-            text-align: center !important;
+    #historyModal .modal-body,
+    #historyModal .history-modal-body {
+        padding: 14px;
+    }
+
+    #historyModal .modal-header {
+        padding: 12px 16px;
+    }
+
+    #historyModal .modal-footer {
+        padding: 10px 16px;
+    }
+
+    #historyModal .history-table {
+        min-width: 800px;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    #historyModal .modal-dialog {
+        width: 98%;
+        margin: 0.5rem auto;
+    }
+
+    #historyModal .modal-content {
+        border-radius: 12px;
+    }
+
+    #historyModal .modal-title {
+        font-size: 16px;
+    }
+
+    #historyModal .history-modal-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+        #historyModal .history-modal-toolbar .d-flex {
+            width: 100%;
         }
 
-    .history-table tbody tr:last-child td {
-        border-bottom: none !important;
+    #historyModal .history-table {
+        min-width: 760px;
     }
 
-    .history-table tbody tr:hover td {
-        background: #f5f8fc !important;
-    }
-
-    /* ── Column Widths ── */
-    .history-table th:nth-child(1),
-    .history-table td:nth-child(1) {
-        width: 8% !important;
-        min-width: 45px !important;
-        text-align: center !important;
-    }
-
-    .history-table th:nth-child(2),
-    .history-table td:nth-child(2) {
-        width: 18% !important;
-        min-width: 75px !important;
-    }
-
-    .history-table th:nth-child(3),
-    .history-table td:nth-child(3) {
-        width: 16% !important;
-        min-width: 75px !important;
-    }
-
-    .history-table th:nth-child(4),
-    .history-table td:nth-child(4) {
-        width: 30% !important;
-        min-width: 90px !important;
-    }
-
-    .history-table th:nth-child(5),
-    .history-table td:nth-child(5) {
-        width: 28% !important;
-        min-width: 110px !important;
-    }
-
-/* ── Pagination ── */
-.history-table-wrapper .pagination {
-    margin: 0.5rem 0 !important;
-    justify-content: flex-end !important;
-    flex-wrap: wrap !important;
-    gap: 0.25rem !important;
-}
-
-    .history-table-wrapper .pagination .page-item .page-link {
-        border: none !important;
-        border-radius: 0.5rem !important;
-        padding: 0.35rem 0.8rem !important;
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        color: #1e293b !important;
-        background: transparent !important;
-        transition: all 0.15s ease !important;
-        box-shadow: none !important;
-    }
-
-        .history-table-wrapper .pagination .page-item .page-link:hover {
-            background: #f1f5f9 !important;
-            color: #0f172a !important;
+        #historyModal .history-table thead th {
+            padding: 7px 9px;
         }
 
-    .history-table-wrapper .pagination .page-item.active .page-link {
-        background: #41598c !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        box-shadow: 0 2px 8px rgba(51, 122, 183, 0.25) !important;
-    }
-
-    .history-table-wrapper .pagination .page-item.disabled .page-link {
-        opacity: 0.4 !important;
-        pointer-events: none !important;
-    }
-
-/* ── DataTables Info ── */
-.history-table-wrapper .dataTables_info {
-    font-size: 0.75rem !important;
-    color: #64748b !important;
-    padding: 0.25rem 0 !important;
-    float: left !important;
-    clear: both !important;
+        #historyModal .history-table tbody td {
+            padding: 6px 9px;
+            font-size: 12px;
+        }
 }
-
-.history-table-wrapper .dataTables_wrapper {
-    overflow: visible !important;
-}
-
-.history-table-wrapper .dataTables_scroll {
-    overflow: visible !important;
-}
-
-.history-btn-close {
-    border-radius: 2rem !important;
-    padding: 0.4rem 1.6rem !important;
-    font-weight: 600 !important;
-    font-size: 0.9rem !important;
-    background: #41598c !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #fff !important;
-    transition: all 0.2s ease !important;
-}
-
-    .history-btn-close:hover {
-        background: #2c6ca3 !important;
-        border-color: #cbd5e1 !important;
-    }
-
 
 /* ──────────────────────────────────────────────────────
    CONFIRMATION MODAL
@@ -1800,7 +1980,7 @@ body.dashboard-page {
    ────────────────────────────────────────────────────── */
 
 /* ── Desktop (min-width: 769px) ── */
-@media (min-width: 769px) {
+/*@media (min-width: 769px) {
     #historyModal .modal-dialog {
         max-width: 90% !important;
         margin-top: 15vh !important;
@@ -1811,7 +1991,7 @@ body.dashboard-page {
         max-height: 85vh !important;
         border-radius: 1.25rem !important;
         min-height: 55vh !important;
-    }
+    }*/
 
     #historyModal .modal-body {
         max-height: 65vh !important;
@@ -1831,7 +2011,7 @@ body.dashboard-page {
 }
 
 /* ── Large Desktop (min-width: 1200px) ── */
-@media (min-width: 1200px) {
+/*@media (min-width: 1200px) {
     #historyModal .modal-dialog {
         max-width: 85% !important;
         margin-top: 15vh !important;
@@ -1840,7 +2020,7 @@ body.dashboard-page {
     #historyModal .modal-content {
         max-height: 82vh !important;
         min-height: 60vh !important;
-    }
+    }*/
 
     #historyModal .modal-body {
         min-height: 40vh !important;
@@ -1854,10 +2034,13 @@ body.dashboard-page {
         margin-top: 18vh !important;
     }
 
-    #historyModal .modal-content {
+/*    #historyModal .modal-content {
         max-height: 80vh !important;
         min-height: 65vh !important;
-    }
+        max-width: 200vh;
+        min-width: 141vh;
+        margin-top: -84px;
+    }*/
 }
 
 /* ──────────────────────────────────────────────────────
@@ -2890,6 +3073,269 @@ body.dashboard-page {
                 background: #fef3c7;
             }
 
+/* ─── Flatpickr Minimal Theme ─── */
+
+/* Calendar Container */
+.flatpickr-calendar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    padding: 0 !important;
+    width: 320px !important;
+}
+
+/* ─── Header ─── */
+.flatpickr-months {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e8ecf0 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 1px 0 8px 0 !important;
+}
+
+.flatpickr-month {
+    background: #41598C !important;
+    color: #fff !important;
+    height: 40px !important;
+}
+
+.flatpickr-current-month {
+    padding: 9px 0 0 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+}
+
+    .flatpickr-current-month .cur-month,
+    .flatpickr-current-month .cur-year {
+        font-weight: 600 !important;
+        color: #fff !important;
+    }
+
+    .flatpickr-current-month .cur-year {
+        margin-left: 4px !important;
+    }
+
+/* ─── Navigation Arrows ─── */
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    fill: #94a3b8 !important;
+    padding: 15px !important;
+    border-radius: 4px !important;
+    transition: all 0.15s ease !important;
+}
+
+    .flatpickr-prev-month:hover,
+    .flatpickr-next-month:hover {
+        fill: #41598c !important;
+        background: #f1f5f9 !important;
+    }
+
+    .flatpickr-prev-month svg,
+    .flatpickr-next-month svg {
+        width: 12px !important;
+        height: 12px !important;
+        margin-bottom: 15px;
+    }
+
+/* ─── Weekday Headers ─── */
+.flatpickr-weekdays {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e8ecf0 !important;
+    padding: 6px 0 !important;
+}
+
+.flatpickr-weekday {
+    color: #64748b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px !important;
+}
+
+/* ─── Day Cells ─── */
+.flatpickr-day {
+    color: #1e293b !important;
+    border-radius: 4px !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    max-width: 40px !important;
+    margin: 0 !important;
+    transition: all 0.12s ease !important;
+    border: none !important;
+}
+
+    /* ─── Today (non-selected) ─── */
+    .flatpickr-day.today {
+        border: 1px solid #41598c !important;
+        color: #41598c !important;
+        background: transparent !important;
+        font-weight: 600 !important;
+    }
+
+        .flatpickr-day.today:hover {
+            background: #f1f5f9 !important;
+            border-color: #41598c !important;
+        }
+
+    /* ─── Hover ─── */
+    .flatpickr-day:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+
+    /* ─── Selected Date ─── */
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+        background: #41598c !important;
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        border-radius: 4px !important;
+    }
+
+        .flatpickr-day.selected:hover,
+        .flatpickr-day.startRange:hover,
+        .flatpickr-day.endRange:hover {
+            background: #2d426b !important;
+            color: #ffffff !important;
+        }
+
+    /* ─── Range Selection (In Range) ─── */
+    .flatpickr-day.inRange {
+        background: rgba(65, 89, 140, 0.08) !important;
+        border: none !important;
+        color: #1e293b !important;
+        border-radius: 0 !important;
+    }
+
+        .flatpickr-day.inRange:hover {
+            background: rgba(65, 89, 140, 0.15) !important;
+        }
+
+    /* ─── Start/End of Range ─── */
+    .flatpickr-day.startRange {
+        border-radius: 4px 0 0 4px !important;
+    }
+
+    .flatpickr-day.endRange {
+        border-radius: 0 4px 4px 0 !important;
+    }
+
+    .flatpickr-day.startRange.endRange {
+        border-radius: 4px !important;
+    }
+
+    /* ─── Disabled / Future Dates ─── */
+    .flatpickr-day.disabled,
+    .flatpickr-day.disabled:hover {
+        color: #cbd5e1 !important;
+        background: transparent !important;
+        cursor: not-allowed !important;
+    }
+
+    /* ─── Weekends ─── */
+    .flatpickr-day.weekend {
+        color: #64748b !important;
+    }
+
+/* ─── Time Picker (if used) ─── */
+.flatpickr-time {
+    border-top: 1px solid #e8ecf0 !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+    .flatpickr-time input {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+        color: #1e293b !important;
+        font-weight: 500 !important;
+    }
+
+/* ─── Month Dropdown ─── */
+.flatpickr-monthDropdown-months {
+    background: #41598c !important; /* Matches the month bar background */
+    color: #ffffff !important; /* White text */
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    padding: 0 4px !important;
+}
+
+    /* ─── Month Dropdown Options ─── */
+    .flatpickr-monthDropdown-months option {
+        background: #ffffff !important; /* White background for options */
+        color: #1e293b !important; /* Dark text for options */
+        padding: 4px 8px !important;
+    }
+
+        /* ─── Month Dropdown Hover ─── */
+        .flatpickr-monthDropdown-months option:hover {
+            background: #f1f5f9 !important; /* Light gray on hover */
+            color: #41598c !important; /* Blue text on hover */
+        }
+
+    /* ─── Month Dropdown Focus/Active ─── */
+    .flatpickr-monthDropdown-months:focus {
+        outline: none !important;
+    }
+
+/* ─── Year Input (if you want to match) ─── */
+.flatpickr-current-month .numInputWrapper {
+    background: transparent !important;
+}
+
+    .flatpickr-current-month .numInputWrapper .numInput {
+        background: transparent !important;
+        color: #ffffff !important; /* White text to match month bar */
+        font-weight: 600 !important;
+        font-size: 16px !important;
+    }
+
+    /* ─── Year Dropdown Arrows ─── */
+    .flatpickr-current-month .numInputWrapper span {
+        border: none !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-radius: 2px !important;
+    }
+
+        .flatpickr-current-month .numInputWrapper span:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        .flatpickr-current-month .numInputWrapper span.arrowUp::after {
+            border-bottom-color: #ffffff !important;
+        }
+
+        .flatpickr-current-month .numInputWrapper span.arrowDown::after {
+            border-top-color: #ffffff !important;
+        }
+
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 480px) {
+    .flatpickr-calendar {
+        width: 280px !important;
+    }
+
+    .flatpickr-day {
+        height: 36px !important;
+        line-height: 36px !important;
+        max-width: 36px !important;
+        font-size: 13px !important;
+    }
+}
+
+@media (min-width: 576px) {
+    .modal {
+        --bs-modal-margin: 6.75rem !important;
+        --bs-modal-box-shadow: var(--bs-box-shadow) !important;
+    }
+}
 /* ──────────────────────────────────────────────────────────────────
    END OF CSS
    ────────────────────────────────────────────────────────────────── */

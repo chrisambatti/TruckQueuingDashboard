@@ -150,7 +150,7 @@
     @* <section class="tv-recent-exits">
         <div class="tv-section-title">
             Recent Exits
-        </div>
+        </div> 
         <div class="tv-exits-list">
             @if (Model.RecentExits != null && Model.RecentExits.Any())
             {
@@ -168,9 +168,9 @@
             }
         </div>
     </section> *@
-</div>
-
-@section Scripts {
+</div> 
+ 
+@* @section Scripts {
     <script>
         window.refreshDashboardData = function () {
             $.ajax({
@@ -183,5 +183,61 @@
                 }
             });
         };
+    </script>
+} *@
+
+@section Scripts {
+    <script>
+
+        // ─── TV Dashboard Refresh ───
+
+        window.refreshDashboardData = function () {
+
+            console.log(
+                "🔄 TV: Refreshing dashboard data..."
+            );
+
+            $.ajax({
+
+                url: '/Dashboard/GetDashboardData',
+
+                type: 'GET',
+
+                cache: false,
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        console.log(
+                            "✅ TV: Dashboard data refreshed"
+                        );
+
+                        location.reload();
+
+                    }
+                    else {
+
+                        console.error(
+                            "❌ TV: Dashboard refresh returned unsuccessful response"
+                        );
+
+                    }
+
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error(
+                        "❌ TV: Dashboard refresh failed:",
+                        error
+                    );
+
+                }
+
+            });
+
+        };
+
     </script>
 }

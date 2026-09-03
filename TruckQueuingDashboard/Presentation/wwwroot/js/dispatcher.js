@@ -15,19 +15,34 @@ $(document).ready(function () {
         });
     }
 
-    // ── 2. Flatpickr for History Modal ──
-    if (typeof flatpickr !== 'undefined') {
-        flatpickr("#historyFromDate, #historyToDate", {
-            enableTime: false,
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d-m-Y",
-            allowInput: true,
-            minDate: new Date(2026, 7, 1),
-            disableMobile: true,
-            onChange: function () { applyHistoryFilters(); }
-        });
+
+    // ─── Helper: parse DD-MM-YYYY or YYYY-MM-DD to Date ──────────────
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        // Try YYYY-MM-DD first (from today's ISO)
+        var parts = dateStr.split('-');
+        if (parts.length === 3) {
+            var year = parseInt(parts[0], 10);
+            var month = parseInt(parts[1], 10) - 1;
+            var day = parseInt(parts[2], 10);
+            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                return new Date(year, month, day);
+            }
+        }
+        // Fallback: try DD-MM-YYYY
+        var parts2 = dateStr.split('-');
+        if (parts2.length === 3) {
+            var day2 = parseInt(parts2[0], 10);
+            var month2 = parseInt(parts2[1], 10) - 1;
+            var year2 = parseInt(parts2[2], 10);
+            if (!isNaN(year2) && !isNaN(month2) && !isNaN(day2)) {
+                return new Date(year2, month2, day2);
+            }
+        }
+        return null;
     }
+
+
 
     // ── 3. History Modal Logic ──
     var historyData = [];
@@ -41,6 +56,7 @@ $(document).ready(function () {
             $('#historyTotalCount').text(0);
             return;
         }
+
         var filtered = historyData.filter(function (ev) {
             var event = ev.event ? ev.event.trim() : '';
             var fleetNumber = ev.fleetNumber ? ev.fleetNumber.trim() : '';
@@ -48,18 +64,28 @@ $(document).ready(function () {
             var evDate = ev.eventTimestamp ? new Date(ev.eventTimestamp) : null;
 
             if (filterValue !== "View All" && event !== filterValue) return false;
+
+            // Date filtering using parseDate
             if (fromDate && evDate) {
-                var from = new Date(fromDate);
-                from.setHours(0, 0, 0, 0);
-                if (evDate < from) return false;
+                var from = parseDate(fromDate);
+                if (from) {
+                    from.setHours(0, 0, 0, 0);
+                    var evStart = new Date(evDate);
+                    evStart.setHours(0, 0, 0, 0);
+                    if (evStart < from) return false;
+                }
             }
             if (toDate && evDate) {
-                var to = new Date(toDate);
-                to.setHours(23, 59, 59, 999);
-                if (evDate > to) return false;
+                var to = parseDate(toDate);
+                if (to) {
+                    to.setHours(23, 59, 59, 999);
+                    var evEnd = new Date(evDate);
+                    evEnd.setHours(23, 59, 59, 999);
+                    if (evEnd > to) return false;
+                }
             }
 
-            // ── Search ──
+            // Search
             if (searchTerm && searchTerm.trim() !== '') {
                 var term = searchTerm.trim().toLowerCase();
                 var match = fleetNumber.toLowerCase().includes(term) ||
@@ -72,6 +98,7 @@ $(document).ready(function () {
             return true;
         });
 
+        // Sort
         if (fromDate || toDate) {
             filtered.sort((a, b) => new Date(a.eventTimestamp) - new Date(b.eventTimestamp));
         } else {
@@ -109,24 +136,19 @@ $(document).ready(function () {
         $('#historyTotalCount').text(filtered.length);
     }
 
+    // ─── Apply filters (always today) ──────────────────────────────
     function applyHistoryFilters() {
-        var fromDate = $('#historyFromDate').val();
-        var toDate = $('#historyToDate').val();
+        var today = new Date();
+        var fromDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+        var toDate = today.toISOString().split('T')[0];
         var searchTerm = $('#historySearch').val();
-
-        if (fromDate && toDate) {
-            var fromParsed = Date.parse(fromDate);
-            var toParsed = Date.parse(toDate);
-            if (fromParsed > toParsed) {
-                showToast('From Date must be less than or equal to To Date', false);
-                return;
-            }
-        }
         var filterValue = $('#historyFilter').val();
+
+        console.log('applyHistoryFilters: from=' + fromDate + ', to=' + toDate); // debug
         filterHistoryTable(filterValue, fromDate, toDate, searchTerm);
     }
 
-    // ── Event listeners ──
+    // ─── Event listeners ─────────────────────────────────────────────
     $('#viewHistoryBtn').on('click', function () {
         $.ajax({
             url: '/Dashboard/GetAllEvents',
@@ -143,7 +165,7 @@ $(document).ready(function () {
                     }
                     $('#historyTable').DataTable({
                         paging: true,
-                        pageLength: 10,
+                        pageLength: 12,
                         info: true,
                         lengthChange: false,
                         searching: false,
@@ -160,30 +182,31 @@ $(document).ready(function () {
                     });
                     historyTableInit = true;
                 }
+                // Clear search and filter (no date pickers to clear)
                 $('#historySearch').val('');
-                $('#historyFromDate').val('');
-                $('#historyToDate').val('');
                 $('#historyFilter').val('View All');
                 applyHistoryFilters();
                 $('#historyModal').modal('show');
             },
             error: function (xhr, status, error) {
+                console.error('Failed to load history:', error);
+                showToast('Failed to load history data', false);
             }
         });
     });
 
-    // ── Search input ──
+    // ─── Search input ──────────────────────────────────────────────
     $('#historySearch').on('keyup', function () {
         applyHistoryFilters();
     });
 
-    // ── Reset on modal close ──
-    $('#historyFilter, #historyFromDate, #historyToDate').on('change', applyHistoryFilters);
+    // ─── Filter change events ──────────────────────────────────────
+    $('#historyFilter').on('change', applyHistoryFilters);
+
+    // ─── Reset on modal close ──────────────────────────────────────
     $('#historyModal').on('hidden.bs.modal', function () {
         $('#historySearch').val('');
         $('#historyFilter').val('View All');
-        $('#historyFromDate').val('');
-        $('#historyToDate').val('');
         applyHistoryFilters();
     });
 
@@ -408,10 +431,50 @@ $(document).ready(function () {
         });
     });
 
-    // ── 8. Initialize DataTable and load initial data ──
+
+    // ── 8. Initialize DataTable and expose refresh function ──
     initializeDataTable();
+
+    window.refreshDashboardData = refreshDashboardData;
+
     refreshDashboardData();
 
 
-    window.refreshDashboardData = refreshDashboardData;
+    // ── 9. Real-Time SignalR Dashboard Refresh ──
+    function registerDashboardSignalR() {
+
+        if (!window.fleetHubConnection) {
+            console.warn("⚠️ Dispatcher: fleetHubConnection not available.");
+            return;
+        }
+
+        window.fleetHubConnection.on("RefreshDashboard", function () {
+
+            console.log("📡 Dispatcher: RefreshDashboard received");
+
+            window.refreshDashboardData();
+
+        });
+
+        console.log("✅ Dispatcher: RefreshDashboard handler registered");
+    }
+
+
+    // Register immediately if the connection already exists
+    if (window.fleetHubConnection) {
+
+        registerDashboardSignalR();
+
+    }
+    // Otherwise wait for site.js to announce that it is ready
+    else {
+
+        window.addEventListener(
+            "fleetHubReady",
+            registerDashboardSignalR,
+            { once: true }
+        );
+
+    }
+
 });

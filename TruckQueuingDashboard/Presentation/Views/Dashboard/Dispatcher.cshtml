@@ -14,7 +14,7 @@
         else
             return $"{(int)time.TotalDays}d {(int)time.Hours}h";
     }
-}
+}      
      
 @section Styles {
     <!-- Page-specific CSS -->
@@ -172,16 +172,16 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-  
+        </div> 
+    </div>    
+</div>  
+     
 <!-- History Modal -->
 <div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-scroll="false">
-    <div class="modal-dialog modal-dialog-scrollable modal-xl">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered modal-xxl">
+        <div class="modal-content">  
             <div class="modal-header">
-                <h5 class="modal-title"><i class="ri-history-line me-2"></i>Event History</h5>
+                <h5 class="modal-title">Event History</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -197,14 +197,6 @@
                             <input type="text" id="historySearch" class="history-search-input" placeholder="Search trucks, events..." />
                         </div> 
                         <div class="history-filter-group">
-                            <label for="historyFromDate" class="history-filter-label">From:</label>
-                            <input type="text" id="historyFromDate" class="history-date-input" placeholder="Select date">
-                        </div>
-                        <div class="history-filter-group">
-                            <label for="historyToDate" class="history-filter-label">To:</label>
-                            <input type="text" id="historyToDate" class="history-date-input" placeholder="Select date">
-                        </div>
-                        <div class="history-filter-group">
                             <select id="historyFilter" class="history-filter-select">
                                 <option value="View All" selected>View All</option>
                                 <option value="Entry">Entry</option>
@@ -213,7 +205,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="history-table-wrapper">
+                <div class="history-table-wrapper"> 
                     <table id="historyTable" class="history-table">
                         <thead>
                             <tr>
@@ -227,10 +219,7 @@
                         <tbody></tbody>
                     </table>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn history-btn-close" data-bs-dismiss="modal">Close</button>
-            </div>
+            </div> 
         </div>
     </div>
 </div>
@@ -250,7 +239,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> 
 
 <!-- Toast Container (positioned top-right of viewport) -->
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; pointer-events: none;">
@@ -281,91 +270,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // ─── 1. Get the modal and inputs ───
-            const modal = document.getElementById('historyModal');
-            const fromInput = document.getElementById('historyFromDate');
-            const toInput = document.getElementById('historyToDate');
-
-            if (!modal || !fromInput || !toInput) return;
-
-            // ─── 2. Toast setup ───
-            const toastEl = document.getElementById('dateValidationToast');
-            const toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 4000 });
-
-            function showToast(msg) {
-                document.getElementById('toastMessage').textContent = msg;
-                toast.show();
-            }
-
-            // ─── 3. Flatpickr instances with maxDate = today ───
-            let fromPicker, toPicker;
-
-            function initDatePickers() {
-                // Destroy any existing instances to avoid duplicates
-                if (fromPicker) fromPicker.destroy();
-                if (toPicker) toPicker.destroy();
-
-                fromPicker = flatpickr(fromInput, {
-                    dateFormat: "d-m-Y",
-                    maxDate: "today", // ⬅️ Disable future dates
-                    onChange: function (selectedDates, dateStr, instance) {
-                        const toVal = toInput.value;
-                        if (toVal) {
-                            const fromDate = selectedDates[0];
-                            const toDate = parseDate(toVal);
-                            if (toDate && fromDate > toDate) {
-                                showToast('From date cannot be later than To date.');
-                                instance.clear();
-                            }
-                        }
-                    }
-                });
-
-                toPicker = flatpickr(toInput, {
-                    dateFormat: "d-m-Y",
-                    maxDate: "today", // ⬅️ Disable future dates
-                    onChange: function (selectedDates, dateStr, instance) {
-                        const fromVal = fromInput.value;
-                        if (fromVal) {
-                            const toDate = selectedDates[0];
-                            const fromDate = parseDate(fromVal);
-                            if (fromDate && toDate < fromDate) {
-                                showToast('To date cannot be older than From date.');
-                                instance.clear();
-                            }
-                        }
-                    }
-                });
-            }
-
-            // ─── Helper: parse a date string in "d-m-Y" format ───
-            function parseDate(str) {
-                if (!str) return null;
-                const parts = str.split('-');
-                if (parts.length !== 3) return null;
-                const day = parseInt(parts[0], 10);
-                const month = parseInt(parts[1], 10) - 1;
-                const year = parseInt(parts[2], 10);
-                return new Date(year, month, day);
-            }
-
-            // ─── 4. Initialize when the modal is shown ───
-            modal.addEventListener('shown.bs.modal', function () {
-                initDatePickers();
-            });
-
-            // If modal is already visible (e.g., on page load after refresh), init immediately
-            if (modal.classList.contains('show')) {
-                initDatePickers();
-            }
-
-            // ─── 5. Clean up when modal is hidden ───
-            modal.addEventListener('hidden.bs.modal', function () {
-                if (fromPicker) fromPicker.destroy();
-                if (toPicker) toPicker.destroy();
-                fromPicker = null;
-                toPicker = null;
-            });
         });
     </script>
 } 
