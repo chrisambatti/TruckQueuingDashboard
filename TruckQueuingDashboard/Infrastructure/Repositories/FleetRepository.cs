@@ -99,7 +99,7 @@ namespace TruckQueuingDashboard.Infrastructure.Repositories
                     Type = record.EventType,
                     RecordTimestamp = record.EntryTimestamp,
                     Location = record.Location,
-                    Status = 0,
+                    Status = record.EventType == "Entry" ? 1 : 0,  
                     CalledNow = false,
                     CreatedBy = username,
                     UpdatedBy = username

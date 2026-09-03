@@ -10,7 +10,12 @@
     <None Remove="TruckQueuingDashboard.csproj.Backup.tmp" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
     <Content Include="Presentation\wwwroot\css\dispatcher.css" />
     <Content Include="Presentation\wwwroot\css\site.css" />
     <Content Include="Presentation\wwwroot\js\dispatcher.js" />
@@ -94,4 +99,10 @@
     <Folder Include="Infrastructure\Data\Migrations\" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Content Update="Presentation\wwwroot\**\*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 </Project>

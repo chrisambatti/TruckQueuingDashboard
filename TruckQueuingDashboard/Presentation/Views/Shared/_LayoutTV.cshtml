@@ -1,0 +1,175 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Live Queue</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="~/css/tv.css"
+          asp-append-version="true" />
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+
+    <partial name="_TvSidebar" />
+
+    <div class="tv-container">
+
+        <header class="tv-header">
+
+            <div class="tv-brand">
+                <i class="ri-truck-line"></i>
+            </div>
+
+            <div class="tv-header-right">
+                <span class="tv-clock" id="tvClock">--:--:--</span>
+            </div>
+
+        </header>
+
+        <main class="tv-main">
+            @RenderBody()
+        </main>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+
+    <script>
+
+            // ─── Real-time clock ───
+
+            function updateClock() {
+
+                const now = new Date();
+
+                document.getElementById('tvClock').textContent =
+                    now.toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+            }
+
+            updateClock();
+
+            setInterval(updateClock, 1000);
+
+
+            // ─── SignalR connection ───
+            // TV layout does not load site.js,
+            // so it maintains its own single SignalR connection.
+
+            if (typeof signalR !== 'undefined') {
+
+                window.fleetHubConnection =
+                    new signalR.HubConnectionBuilder()
+                        .withUrl("/fleetHub")
+                        .withAutomaticReconnect()
+                        .build();
+
+
+                window.fleetHubConnection.on("RefreshDashboard", function () {
+
+                    console.log("📡 TV: RefreshDashboard received");
+
+                    if (typeof window.refreshDashboardData === "function") {
+
+                        window.refreshDashboardData();
+
+                    }
+                    else {
+
+                        // Safety fallback if the page refresh function
+                        // has not been registered yet.
+                        location.reload();
+
+                    }
+
+                });
+
+
+                window.fleetHubConnection.start()
+                    .then(function () {
+
+                        console.log("✅ TV: SignalR connected");
+
+                        window.dispatchEvent(
+                            new Event("fleetHubReady")
+                        );
+
+                    })
+                    .catch(function (err) {
+
+                        console.error(
+                            "❌ TV: SignalR connection error:",
+                            err
+                        );
+
+                    });
+
+
+                window.fleetHubConnection.onreconnecting(function (error) {
+
+                    console.warn(
+                        "⚠️ TV: SignalR reconnecting...",
+                        error
+                    );
+
+                });
+
+
+                window.fleetHubConnection.onreconnected(function (connectionId) {
+
+                    console.log(
+                        "✅ TV: SignalR reconnected:",
+                        connectionId
+                    );
+
+                });
+
+
+                window.fleetHubConnection.onclose(function (error) {
+
+                    console.error(
+                        "❌ TV: SignalR connection closed:",
+                        error
+                    );
+
+                });
+
+            }
+            else {
+
+                console.warn(
+                    "⚠️ TV: SignalR library not loaded."
+                );
+
+            }
+
+    </script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

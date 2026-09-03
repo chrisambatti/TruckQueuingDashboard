@@ -15,25 +15,40 @@ $(document).ready(function () {
         });
     }
 
-    // ── 2. Flatpickr for History Modal ──
-    if (typeof flatpickr !== 'undefined') {
-        flatpickr("#historyFromDate, #historyToDate", {
-            enableTime: false,
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "d-m-Y",
-            allowInput: true,
-            minDate: new Date(2026, 7, 1),
-            disableMobile: true,
-            onChange: function () { applyHistoryFilters(); }
-        });
+
+    // ─── Helper: parse DD-MM-YYYY or YYYY-MM-DD to Date ──────────────
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        // Try YYYY-MM-DD first (from today's ISO)
+        var parts = dateStr.split('-');
+        if (parts.length === 3) {
+            var year = parseInt(parts[0], 10);
+            var month = parseInt(parts[1], 10) - 1;
+            var day = parseInt(parts[2], 10);
+            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                return new Date(year, month, day);
+            }
+        }
+        // Fallback: try DD-MM-YYYY
+        var parts2 = dateStr.split('-');
+        if (parts2.length === 3) {
+            var day2 = parseInt(parts2[0], 10);
+            var month2 = parseInt(parts2[1], 10) - 1;
+            var year2 = parseInt(parts2[2], 10);
+            if (!isNaN(year2) && !isNaN(month2) && !isNaN(day2)) {
+                return new Date(year2, month2, day2);
+            }
+        }
+        return null;
     }
+
+
 
     // ── 3. History Modal Logic ──
     var historyData = [];
     var historyTableInit = false;
 
-    function filterHistoryTable(filterValue, fromDate, toDate) {
+    function filterHistoryTable(filterValue, fromDate, toDate, searchTerm) {
         var table = $('#historyTable').DataTable();
         table.clear();
         if (!historyData || historyData.length === 0) {
@@ -41,27 +56,55 @@ $(document).ready(function () {
             $('#historyTotalCount').text(0);
             return;
         }
+
         var filtered = historyData.filter(function (ev) {
             var event = ev.event ? ev.event.trim() : '';
+            var fleetNumber = ev.fleetNumber ? ev.fleetNumber.trim() : '';
+            var location = ev.location ? ev.location.trim() : '';
             var evDate = ev.eventTimestamp ? new Date(ev.eventTimestamp) : null;
+
             if (filterValue !== "View All" && event !== filterValue) return false;
+
+            // Date filtering using parseDate
             if (fromDate && evDate) {
-                var from = new Date(fromDate);
-                from.setHours(0, 0, 0, 0);
-                if (evDate < from) return false;
+                var from = parseDate(fromDate);
+                if (from) {
+                    from.setHours(0, 0, 0, 0);
+                    var evStart = new Date(evDate);
+                    evStart.setHours(0, 0, 0, 0);
+                    if (evStart < from) return false;
+                }
             }
             if (toDate && evDate) {
-                var to = new Date(toDate);
-                to.setHours(23, 59, 59, 999);
-                if (evDate > to) return false;
+                var to = parseDate(toDate);
+                if (to) {
+                    to.setHours(23, 59, 59, 999);
+                    var evEnd = new Date(evDate);
+                    evEnd.setHours(23, 59, 59, 999);
+                    if (evEnd > to) return false;
+                }
             }
+
+            // Search
+            if (searchTerm && searchTerm.trim() !== '') {
+                var term = searchTerm.trim().toLowerCase();
+                var match = fleetNumber.toLowerCase().includes(term) ||
+                    event.toLowerCase().includes(term) ||
+                    location.toLowerCase().includes(term) ||
+                    (ev.eventTimestamp ? new Date(ev.eventTimestamp).toLocaleString().toLowerCase().includes(term) : false);
+                if (!match) return false;
+            }
+
             return true;
         });
+
+        // Sort
         if (fromDate || toDate) {
             filtered.sort((a, b) => new Date(a.eventTimestamp) - new Date(b.eventTimestamp));
         } else {
             filtered.sort((a, b) => new Date(b.eventTimestamp) - new Date(a.eventTimestamp));
         }
+
         if (filtered.length === 0) {
             table.row.add(['<td colspan="5" class="text-center py-4 text-muted">No events found.</td>']);
         } else {
@@ -88,25 +131,24 @@ $(document).ready(function () {
                 ]);
             });
         }
+
         table.draw();
         $('#historyTotalCount').text(filtered.length);
     }
 
+    // ─── Apply filters (always today) ──────────────────────────────
     function applyHistoryFilters() {
-        var fromDate = $('#historyFromDate').val();
-        var toDate = $('#historyToDate').val();
-        if (fromDate && toDate) {
-            var fromParsed = Date.parse(fromDate);
-            var toParsed = Date.parse(toDate);
-            if (fromParsed > toParsed) {
-                showToast('From Date must be less than or equal to To Date', false);
-                return;
-            }
-        }
+        var today = new Date();
+        var fromDate = today.toISOString().split('T')[0]; // "YYYY-MM-DD"
+        var toDate = today.toISOString().split('T')[0];
+        var searchTerm = $('#historySearch').val();
         var filterValue = $('#historyFilter').val();
-        filterHistoryTable(filterValue, fromDate, toDate);
+
+        console.log('applyHistoryFilters: from=' + fromDate + ', to=' + toDate); // debug
+        filterHistoryTable(filterValue, fromDate, toDate, searchTerm);
     }
 
+    // ─── Event listeners ─────────────────────────────────────────────
     $('#viewHistoryBtn').on('click', function () {
         $.ajax({
             url: '/Dashboard/GetAllEvents',
@@ -123,7 +165,7 @@ $(document).ready(function () {
                     }
                     $('#historyTable').DataTable({
                         paging: true,
-                        pageLength: 10,
+                        pageLength: 12,
                         info: true,
                         lengthChange: false,
                         searching: false,
@@ -140,22 +182,31 @@ $(document).ready(function () {
                     });
                     historyTableInit = true;
                 }
-                $('#historyFromDate').val('');
-                $('#historyToDate').val('');
+                // Clear search and filter (no date pickers to clear)
+                $('#historySearch').val('');
                 $('#historyFilter').val('View All');
                 applyHistoryFilters();
                 $('#historyModal').modal('show');
             },
             error: function (xhr, status, error) {
+                console.error('Failed to load history:', error);
+                showToast('Failed to load history data', false);
             }
         });
     });
 
-    $('#historyFilter, #historyFromDate, #historyToDate').on('change', applyHistoryFilters);
+    // ─── Search input ──────────────────────────────────────────────
+    $('#historySearch').on('keyup', function () {
+        applyHistoryFilters();
+    });
+
+    // ─── Filter change events ──────────────────────────────────────
+    $('#historyFilter').on('change', applyHistoryFilters);
+
+    // ─── Reset on modal close ──────────────────────────────────────
     $('#historyModal').on('hidden.bs.modal', function () {
+        $('#historySearch').val('');
         $('#historyFilter').val('View All');
-        $('#historyFromDate').val('');
-        $('#historyToDate').val('');
         applyHistoryFilters();
     });
 
@@ -206,7 +257,7 @@ $(document).ready(function () {
 
         // ── Update bays ──
         var bayTrucks = queue.slice(0, bayCount);
-        var upNext = queue.slice(bayCount, bayCount + 2);
+        var upNext = queue.slice(bayCount, bayCount + 4);
 
         $('.queue-stats .now-serving-ticket.primary').each(function (index) {
             var bay = bayTrucks[index];
@@ -232,15 +283,37 @@ $(document).ready(function () {
         });
 
         // ── Update Up Next ──
+        // ── Update Up Next with waiting time ──
+        var upNext = queue.slice(bayCount, bayCount + 4); // adjust count
         var $upNextList = $('.up-next-list');
         $upNextList.empty();
         if (upNext.length > 0) {
             upNext.forEach(function (ev) {
+                var waitingText = '';
+                if (ev.event === 'Entry') {
+                    var diff = new Date() - new Date(ev.eventTimestamp);
+                    var minutes = Math.floor(diff / 60000);
+                    var hours = Math.floor(minutes / 60);
+                    var days = Math.floor(hours / 24);
+                    if (days > 0) {
+                        waitingText = days + 'd ' + (hours % 24) + 'h';
+                    } else if (hours > 0) {
+                        waitingText = hours + 'h ' + (minutes % 60) + 'm';
+                    } else if (minutes > 0) {
+                        waitingText = minutes + 'm';
+                    } else {
+                        waitingText = 'Just now';
+                    }
+                }
+                var statusClass = ev.event === 'Entry' ? 'status-waiting' : 'status-exit';
+                var statusLabel = ev.event === 'Entry' ? 'Waiting' : 'Exit';
+                var waitingHtml = ev.event === 'Entry' ? '<span class="up-next-waiting"><i class="ri-time-line"></i> ' + waitingText + '</span>' : '';
                 $upNextList.append(
                     '<div class="up-next-item">' +
                     '<span class="up-next-turn">#' + ev.turn + '</span>' +
                     '<span class="up-next-truck">' + ev.fleetNumber + '</span>' +
-                    '<span class="up-next-badge badge-entry">' + ev.event + '</span>' +
+                    '<span class="up-next-status ' + statusClass + '">' + statusLabel + '</span>' +
+                    waitingHtml +
                     '</div>'
                 );
             });
@@ -276,13 +349,13 @@ $(document).ready(function () {
                     '<span class="datetime-sep"> | </span>' +
                     '<span class="datetime-time">' + new Date(ev.eventTimestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) + '</span>',
                     actionHtml,
-                    ev.calledNow ? '0' : ev.turn   
+                    ev.calledNow ? '0' : ev.turn
                 ];
                 fleetTable.row.add(rowData);
             });
         }
-         
-        fleetTable.draw(); 
+
+        fleetTable.draw();
     }
 
     function recalculateTurnNumbers() {
@@ -358,10 +431,50 @@ $(document).ready(function () {
         });
     });
 
-    // ── 8. Initialize DataTable and load initial data ──
-    initializeDataTable();
-    refreshDashboardData();   
 
+    // ── 8. Initialize DataTable and expose refresh function ──
+    initializeDataTable();
 
     window.refreshDashboardData = refreshDashboardData;
+
+    refreshDashboardData();
+
+
+    // ── 9. Real-Time SignalR Dashboard Refresh ──
+    function registerDashboardSignalR() {
+
+        if (!window.fleetHubConnection) {
+            console.warn("⚠️ Dispatcher: fleetHubConnection not available.");
+            return;
+        }
+
+        window.fleetHubConnection.on("RefreshDashboard", function () {
+
+            console.log("📡 Dispatcher: RefreshDashboard received");
+
+            window.refreshDashboardData();
+
+        });
+
+        console.log("✅ Dispatcher: RefreshDashboard handler registered");
+    }
+
+
+    // Register immediately if the connection already exists
+    if (window.fleetHubConnection) {
+
+        registerDashboardSignalR();
+
+    }
+    // Otherwise wait for site.js to announce that it is ready
+    else {
+
+        window.addEventListener(
+            "fleetHubReady",
+            registerDashboardSignalR,
+            { once: true }
+        );
+
+    }
+
 });

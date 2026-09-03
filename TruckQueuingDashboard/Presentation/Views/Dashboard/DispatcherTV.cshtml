@@ -1,0 +1,243 @@
+﻿@model TruckQueuingDashboard.Application.DTOs.DashboardViewModel
+@{
+    Layout = "_LayoutTV";
+    ViewData["Title"] = "Truck Queuing TV";
+
+    string FormatWaitingTime(TimeSpan time)
+    {
+        if (time.TotalSeconds < 60)
+            return "Just now";
+        else if (time.TotalMinutes < 60)
+            return $"{(int)time.TotalMinutes}m";
+        else if (time.TotalHours < 24)
+            return $"{(int)time.TotalHours}h {(int)time.Minutes}m";
+        else
+            return $"{(int)time.TotalDays}d {(int)time.Hours}h";
+    }
+
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/tv.css" asp-append-version="true" />
+}
+
+<div class="tv-grid">
+    <!-- ─── 1. NOW SERVING (Top, Most Prominent) ─── -->
+    <section class="tv-now-serving">
+        <div class="tv-section-title">
+             Now Serving 
+        </div> 
+        <div class="tv-bays">
+            @{
+                int bayCount = Model.MaxBays > 0 ? Model.MaxBays : 2;
+                var queue = Model.FleetEvents ?? new List<FleetEventDto>();
+                var bayTrucks = queue.Take(bayCount).ToList();
+                var waitingList = queue.Skip(bayCount).ToList();
+                var upNext = waitingList.Take(4).ToList();
+                var remainingWaiting = waitingList.Skip(4).ToList();
+            }
+            @for (int i = 0; i < bayCount; i++)
+            {
+                var bay = bayTrucks.ElementAtOrDefault(i);
+                <div class="tv-bay-card @(bay?.CalledNow == true ? "called" : "")">
+                    <div class="tv-bay-label">Bay @(i + 1)</div>
+                    @if (bay != null)
+                    {
+                        <div class="tv-bay-fleet">@bay.FleetNumber</div>
+                        <div class="tv-bay-turn">Turn @bay.Turn</div>
+                        @if (bay.CalledNow)
+                        {
+                            <div class="tv-bay-called"> Called</div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="tv-bay-empty">—</div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+        <!-- ─── 3. UP NEXT ─── -->
+    <section class="tv-upnext">
+        <div class="tv-section-title">
+            Up Next
+        </div>
+        <div class="tv-upnext-list">
+            @if (upNext != null && upNext.Any())
+            {
+                foreach (var ev in upNext)
+                {
+                    var timeWaiting = DateTime.Now - ev.EventTimestamp;
+                    <div class="tv-upnext-item">
+                        <span class="tv-upnext-turn"> @ev.Turn</span>
+                        <span class="tv-upnext-truck">@ev.FleetNumber</span>
+                        <span class="tv-upnext-status @(ev.Event == "Entry" ? "status-waiting" : "status-exit")">
+                            @(ev.Event == "Entry" ? "Waiting" : "Exit")
+                        </span>
+                        @if (ev.Event == "Entry")
+                        {
+                            <span class="tv-upnext-waiting">
+                                <i class="ri-time-line"></i> @FormatWaitingTime(timeWaiting)
+                            </span>
+                        }
+                    </div>
+                }
+            }                 
+            else   
+            {     
+                <div class="tv-upnext-empty">— No upcoming trucks —</div>
+            }
+        </div>
+    </section>
+
+    <!-- ─── LIVE QUEUE ─── -->
+    <section class="tv-waiting">
+        <div class="tv-section-title">
+            
+            Live Queue
+
+            <span class="tv-waiting-count">
+                @waitingList.Count
+            </span>
+        </div>
+          
+        <div class="tv-waiting-scroll">
+
+            @if (waitingList.Any())
+            {
+                foreach (var ev in waitingList)
+                {
+                    <div class="tv-waiting-item">
+
+                        <div class="tv-waiting-turn">
+                            Turn @ev.Turn
+                        </div>
+
+                        <div class="tv-waiting-truck">
+                            @ev.FleetNumber
+                        </div>
+
+                        <div class="tv-waiting-status">
+                            <span>WAITING</span>
+                        </div>
+
+                        <div class="tv-waiting-time">
+                            <i class="ri-time-line"></i>
+                            @FormatWaitingTime(DateTime.Now - ev.EventTimestamp)
+                        </div>
+
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="tv-waiting-empty">
+                    No trucks waiting
+                </div>
+            }
+
+        </div>
+           
+    </section>                  
+
+
+
+    <!--We can use this maybe, but not sure if useful-->
+    <!-- ─── 4. RECENT EXITS ─── -->
+    @* <section class="tv-recent-exits">
+        <div class="tv-section-title">
+            Recent Exits
+        </div> 
+        <div class="tv-exits-list">
+            @if (Model.RecentExits != null && Model.RecentExits.Any())
+            {
+                foreach (var exit in Model.RecentExits)
+                {
+                    <div class="tv-exit-item">
+                        <span class="tv-exit-truck">@exit.FleetNumber</span>
+                        <span class="tv-exit-time">@exit.EventTimestamp.ToString("HH:mm")</span>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="tv-exit-empty">— No recent exits —</div>
+            }
+        </div>
+    </section> *@
+</div> 
+ 
+@* @section Scripts {
+    <script>
+        window.refreshDashboardData = function () {
+            $.ajax({
+                url: '/Dashboard/GetDashboardData',
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                }
+            });
+        };
+    </script>
+} *@
+
+@section Scripts {
+    <script>
+
+        // ─── TV Dashboard Refresh ───
+
+        window.refreshDashboardData = function () {
+
+            console.log(
+                "🔄 TV: Refreshing dashboard data..."
+            );
+
+            $.ajax({
+
+                url: '/Dashboard/GetDashboardData',
+
+                type: 'GET',
+
+                cache: false,
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        console.log(
+                            "✅ TV: Dashboard data refreshed"
+                        );
+
+                        location.reload();
+
+                    }
+                    else {
+
+                        console.error(
+                            "❌ TV: Dashboard refresh returned unsuccessful response"
+                        );
+
+                    }
+
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error(
+                        "❌ TV: Dashboard refresh failed:",
+                        error
+                    );
+
+                }
+
+            });
+
+        };
+
+    </script>
+}

@@ -1,0 +1,37 @@
+﻿<!-- ─── NAVBAR ─── -->
+<nav class="navbar navbar-expand-md navbar-dark fixed-top" style="height:50px; background-color:#41598c;">
+    <div class="container-fluid d-flex align-items-center">
+        <a class="navbar-brand" asp-controller="Dashboard" asp-action="Dispatcher" style="padding:0;">
+            <img src="~/images/WAC_logo.png" alt="WAC Logo" style="height:45px; width:auto;" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- ⏰ DIGITAL CLOCK (right side) -->
+        <div class="ms-auto d-none d-md-block">   
+            <span id="liveClock">--:--:-- --</span>
+        </div>
+    </div>
+</nav>
+
+<!-- ─── CLOCK SCRIPT (12‑hour AM/PM) ─── -->
+<script>
+    (function () {
+        var clockElement = document.getElementById('liveClock');
+        if (!clockElement) return;
+
+        function updateClock() { 
+            var now = new Date();
+            var hours = now.getHours();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12; // 12-hour format
+            var minutes = String(now.getMinutes()).padStart(2, '0');
+            var seconds = String(now.getSeconds()).padStart(2, '0');
+            clockElement.textContent = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    })();
+</script>
